@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.pem
+*.key
+.github_master_token
+.claude/

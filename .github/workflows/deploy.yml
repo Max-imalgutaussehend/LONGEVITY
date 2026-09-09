@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: |
+            ghcr.io/max-imalgutaussehend/longevity-backend:${{ github.sha }}
+            ghcr.io/max-imalgutaussehend/longevity-backend:latest
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          push: true
+          build-args: VITE_API_BASE_URL=/api
+          tags: |
+            ghcr.io/max-imalgutaussehend/longevity-frontend:${{ github.sha }}
+            ghcr.io/max-imalgutaussehend/longevity-frontend:latest
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/longevity
+            docker compose pull
+            docker compose run --rm api pnpm db:migrate
+            docker compose up -d --wait
+            curl -fsS --retry 6 --retry-delay 5 https://${{ secrets.SSH_HOST }}/api/healthz
+
+      - name: Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/longevity
+            PREV_SHA=$(docker inspect ghcr.io/max-imalgutaussehend/longevity-backend:previous --format '{{.Id}}' 2>/dev/null || echo "")
+            if [ -n "$PREV_SHA" ]; then
+              docker compose up -d --wait
+            fi

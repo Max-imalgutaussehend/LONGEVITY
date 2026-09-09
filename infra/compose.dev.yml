@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: longevity
+      POSTGRES_USER: longevity
+      POSTGRES_PASSWORD: longevity_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U longevity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://longevity:longevity_dev@db:5432/longevity
+      SESSION_SECRET: dev-session-secret-32-bytes-long!!
+      SIGNING_KEY_PRIVATE: ${SIGNING_KEY_PRIVATE}
+      SIGNING_KEY_PUBLIC: ${SIGNING_KEY_PUBLIC}
+      PUBLIC_BASE_URL: http://localhost
+      SMTP_URL: smtp://mailpit:1025
+      NODE_ENV: development
+      COMMIT_SHA: dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../backend/src:/app/src:ro
+
+  web:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  db_data:

@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: longevity
+      POSTGRES_USER: longevity
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-longevity_dev}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U longevity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: ghcr.io/max-imalgutaussehend/longevity-backend:latest
+    environment:
+      DATABASE_URL: postgres://longevity:${POSTGRES_PASSWORD:-longevity_dev}@db:5432/longevity
+      SESSION_SECRET: ${SESSION_SECRET}
+      SIGNING_KEY_PRIVATE: ${SIGNING_KEY_PRIVATE}
+      SIGNING_KEY_PUBLIC: ${SIGNING_KEY_PUBLIC}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
+      NODE_ENV: production
+      COMMIT_SHA: ${COMMIT_SHA:-unknown}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  web:
+    image: ghcr.io/max-imalgutaussehend/longevity-frontend:latest
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:
