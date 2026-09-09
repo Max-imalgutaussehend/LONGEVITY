@@ -92,7 +92,7 @@ jobs:
             # Ensure Caddy knows about longevity — append if not present
             CADDY_FILE=/opt/life-server/compose/generated/caddy/Caddyfile
             if ! grep -q 'longevity' "$CADDY_FILE"; then
-              printf '\n# ── longevity — Health Score App\nhttp://longevity{$ENV_PREFIX}.{$DOMAIN} {\n\treverse_proxy /api/* {$ENV_PREFIX_NAME}longevity-api:3000\n\treverse_proxy * {$ENV_PREFIX_NAME}longevity:80\n}\n' >> "$CADDY_FILE"
+              printf '\n# ── longevity — Health Score App\nhttp://longevity{$ENV_PREFIX}.{$DOMAIN} {\n\treverse_proxy /api/* {$ENV_PREFIX_NAME}longevity-api:3000\n\treverse_proxy * {$ENV_PREFIX_NAME}longevity:8082\n}\n' >> "$CADDY_FILE"
               docker exec $(docker ps -qf name=caddy) caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
             fi
 
