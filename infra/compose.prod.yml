@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    container_name: ${ENV_PREFIX_NAME:-prod-}longevity-db
+    environment:
+      POSTGRES_DB: longevity
+      POSTGRES_USER: longevity
+      POSTGRES_PASSWORD: ${POSTGRES_LONGEVITY_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U longevity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: ${LONGEVITY_API_IMAGE}
+    restart: unless-stopped
+    container_name: ${ENV_PREFIX_NAME:-prod-}longevity-api
+    environment:
+      DATABASE_URL: postgres://longevity:${POSTGRES_LONGEVITY_PASSWORD}@${ENV_PREFIX_NAME:-prod-}longevity-db:5432/longevity
+      SESSION_SECRET: ${LONGEVITY_SESSION_SECRET}
+      NODE_ENV: production
+      COMMIT_SHA: ${LONGEVITY_COMMIT_SHA:-unknown}
+    networks:
+      - internal
+      - edge
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  web:
+    image: ${LONGEVITY_WEB_IMAGE}
+    restart: unless-stopped
+    container_name: ${ENV_PREFIX_NAME:-prod-}longevity
+    networks:
+      - internal
+      - edge
+    depends_on:
+      - api
+
+networks:
+  internal:
+    internal: true
+  edge:
+    external: true
+    name: ${ENV_PREFIX_NAME:-prod-}net-edge
+
+volumes:
+  db_data:

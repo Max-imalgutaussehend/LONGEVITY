@@ -67,19 +67,42 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -euo pipefail
-            cd /opt/life-server
-            COMPOSE="docker compose --env-file .env -f compose/docker-compose.prod.yml"
 
-            # Update pinned image references in .env
-            sed -i "s|^LONGEVITY_API_IMAGE=.*|LONGEVITY_API_IMAGE=${{ steps.digests.outputs.api }}|" .env
-            sed -i "s|^LONGEVITY_WEB_IMAGE=.*|LONGEVITY_WEB_IMAGE=${{ steps.digests.outputs.web }}|" .env
-            sed -i "s|^LONGEVITY_COMMIT_SHA=.*|LONGEVITY_COMMIT_SHA=${{ github.sha }}|" .env
+            mkdir -p /opt/longevity
 
-            $COMPOSE pull longevity longevity-api
+            # Deploy compose file (base64-encoded to avoid heredoc issues in ssh-action)
+            echo 'c2VydmljZXM6CiAgZGI6CiAgICBpbWFnZTogcG9zdGdyZXM6MTYtYWxwaW5lCiAgICByZXN0YXJ0OiB1bmxlc3Mtc3RvcHBlZAogICAgY29udGFpbmVyX25hbWU6ICR7RU5WX1BSRUZJWF9OQU1FOi1wcm9kLX1sb25nZXZpdHktZGIKICAgIGVudmlyb25tZW50OgogICAgICBQT1NUR1JFU19EQjogbG9uZ2V2aXR5CiAgICAgIFBPU1RHUkVTX1VTRVI6IGxvbmdldml0eQogICAgICBQT1NUR1JFU19QQVNTV09SRDogJHtQT1NUR1JFU19MT05HRVZJVFlfUEFTU1dPUkR9CiAgICB2b2x1bWVzOgogICAgICAtIGRiX2RhdGE6L3Zhci9saWIvcG9zdGdyZXNxbC9kYXRhCiAgICBuZXR3b3JrczoKICAgICAgLSBpbnRlcm5hbAogICAgaGVhbHRoY2hlY2s6CiAgICAgIHRlc3Q6IFsiQ01ELVNIRUxMIiwgInBnX2lzcmVhZHkgLVUgbG9uZ2V2aXR5Il0KICAgICAgaW50ZXJ2YWw6IDVzCiAgICAgIHRpbWVvdXQ6IDVzCiAgICAgIHJldHJpZXM6IDEwCgogIGFwaToKICAgIGltYWdlOiAke0xPTkdFVklUWV9BUElfSU1BR0V9CiAgICByZXN0YXJ0OiB1bmxlc3Mtc3RvcHBlZAogICAgY29udGFpbmVyX25hbWU6ICR7RU5WX1BSRUZJWF9OQU1FOi1wcm9kLX1sb25nZXZpdHktYXBpCiAgICBlbnZpcm9ubWVudDoKICAgICAgREFUQUJBU0VfVVJMOiBwb3N0Z3JlczovL2xvbmdldml0eToke1BPU1RHUkVTX0xPTkdFVklUWV9QQVNTV09SRH1AJHtFTlZfUFJFRklYX05BTUU6LXByb2QtfWxvbmdldml0eS1kYjo1NDMyL2xvbmdldml0eQogICAgICBTRVNTSU9OX1NFQ1JFVDogJHtMT05HRVZJVFlfU0VTU0lPTl9TRUNSRVR9CiAgICAgIE5PREVfRU5WOiBwcm9kdWN0aW9uCiAgICAgIENPTU1JVF9TSEE6ICR7TE9OR0VWSVRZX0NPTU1JVF9TSEE6LXVua25vd259CiAgICBuZXR3b3JrczoKICAgICAgLSBpbnRlcm5hbAogICAgICAtIGVkZ2UKICAgIGRlcGVuZHNfb246CiAgICAgIGRiOgogICAgICAgIGNvbmRpdGlvbjogc2VydmljZV9oZWFsdGh5CiAgICBoZWFsdGhjaGVjazoKICAgICAgdGVzdDogWyJDTUQtU0hFTEwiLCAid2dldCAtcU8tIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvaGVhbHRoeiB8fCBleGl0IDEiXQogICAgICBpbnRlcnZhbDogMTBzCiAgICAgIHRpbWVvdXQ6IDVzCiAgICAgIHJldHJpZXM6IDYKCiAgd2ViOgogICAgaW1hZ2U6ICR7TE9OR0VWSVRZX1dFQl9JTUFHRX0KICAgIHJlc3RhcnQ6IHVubGVzcy1zdG9wcGVkCiAgICBjb250YWluZXJfbmFtZTogJHtFTlZfUFJFRklYX05BTUU6LXByb2QtfWxvbmdldml0eQogICAgbmV0d29ya3M6CiAgICAgIC0gaW50ZXJuYWwKICAgICAgLSBlZGdlCiAgICBkZXBlbmRzX29uOgogICAgICAtIGFwaQoKbmV0d29ya3M6CiAgaW50ZXJuYWw6CiAgICBpbnRlcm5hbDogdHJ1ZQogIGVkZ2U6CiAgICBleHRlcm5hbDogdHJ1ZQogICAgbmFtZTogJHtFTlZfUFJFRklYX05BTUU6LXByb2QtfW5ldC1lZGdlCgp2b2x1bWVzOgogIGRiX2RhdGE6Cg==' | base64 -d > /opt/longevity/compose.prod.yml
 
-            $COMPOSE run --rm --entrypoint node longevity-api dist/db/migrate.js
+            # Fetch shared secrets from life-server .env
+            PG_PASS=$(grep ^POSTGRES_LONGEVITY_PASSWORD /opt/life-server/.env | cut -d= -f2)
+            SESSION=$(grep ^LONGEVITY_SESSION_SECRET /opt/life-server/.env | cut -d= -f2)
+            ENV_PREFIX=$(grep ^ENV_PREFIX_NAME /opt/life-server/.env | cut -d= -f2-)
 
-            $COMPOSE up -d --no-deps --wait longevity longevity-api
+            # Write longevity-only .env
+            printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\n' \
+              '${{ steps.digests.outputs.api }}' \
+              '${{ steps.digests.outputs.web }}' \
+              '${{ github.sha }}' \
+              "$PG_PASS" \
+              "$SESSION" \
+              "$ENV_PREFIX" \
+              > /opt/longevity/.env
+
+            # Ensure Caddy knows about longevity — append if not present
+            CADDY_FILE=/opt/life-server/compose/generated/caddy/Caddyfile
+            if ! grep -q 'longevity' "$CADDY_FILE"; then
+              printf '\n# ── longevity — Health Score App\nlongevity{$ENV_PREFIX}.{$DOMAIN} {\n\treverse_proxy /api/* {$ENV_PREFIX_NAME}longevity-api:3000\n\treverse_proxy * {$ENV_PREFIX_NAME}longevity:80\n}\n' >> "$CADDY_FILE"
+              docker exec $(docker ps -qf name=caddy) caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
+            fi
+
+            cd /opt/longevity
+            COMPOSE="docker compose --env-file .env -f compose.prod.yml"
+
+            $COMPOSE pull
+
+            $COMPOSE run --rm --entrypoint node api dist/db/migrate.js
+
+            $COMPOSE up -d --wait
 
             curl -fsS --retry 6 --retry-delay 5 \
               https://longevity.maxrommel.de/api/healthz
@@ -92,7 +115,5 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /opt/life-server
-            docker compose --env-file .env -f compose/docker-compose.prod.yml up -d --no-deps \
-              longevity longevity-api || true
-            echo "Rollback attempted — check container state manually"
+            cd /opt/longevity && docker compose --env-file .env -f compose.prod.yml up -d --wait || true
+            echo "Rollback attempted"
