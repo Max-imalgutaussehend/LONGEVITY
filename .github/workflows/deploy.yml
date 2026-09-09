@@ -7,17 +7,13 @@ on:
 
 jobs:
   deploy:
-    name: Build & Deploy
+    name: Build & Deploy to longevity.maxrommel.de
     runs-on: ubuntu-latest
     environment: production
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -26,37 +22,71 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build & push backend image
         uses: docker/build-push-action@v6
         with:
           context: backend
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ghcr.io/max-imalgutaussehend/longevity-backend:${{ github.sha }}
             ghcr.io/max-imalgutaussehend/longevity-backend:latest
+          # Capture digest for pinned image reference (ADR-0011)
+          outputs: type=image,name=ghcr.io/max-imalgutaussehend/longevity-backend,push=true
 
       - name: Build & push frontend image
         uses: docker/build-push-action@v6
         with:
           context: frontend
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: VITE_API_BASE_URL=/api
           tags: |
             ghcr.io/max-imalgutaussehend/longevity-frontend:${{ github.sha }}
             ghcr.io/max-imalgutaussehend/longevity-frontend:latest
 
-      - name: Deploy to VPS
+      - name: Get image digests
+        id: digests
+        run: |
+          API_DIGEST=$(docker buildx imagetools inspect ghcr.io/max-imalgutaussehend/longevity-backend:${{ github.sha }} --format '{{.Manifest.Digest}}')
+          WEB_DIGEST=$(docker buildx imagetools inspect ghcr.io/max-imalgutaussehend/longevity-frontend:${{ github.sha }} --format '{{.Manifest.Digest}}')
+          echo "api=ghcr.io/max-imalgutaussehend/longevity-backend@${API_DIGEST}" >> $GITHUB_OUTPUT
+          echo "web=ghcr.io/max-imalgutaussehend/longevity-frontend@${WEB_DIGEST}" >> $GITHUB_OUTPUT
+
+      - name: Deploy to life-server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: deploy
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /opt/longevity
-            docker compose pull
-            docker compose run --rm api pnpm db:migrate
-            docker compose up -d --wait
-            curl -fsS --retry 6 --retry-delay 5 https://${{ secrets.SSH_HOST }}/api/healthz
+            set -euo pipefail
+            cd /opt/life-server
+
+            # Update pinned image references in .env (ADR-0011)
+            sed -i "s|^LONGEVITY_API_IMAGE=.*|LONGEVITY_API_IMAGE=${{ steps.digests.outputs.api }}|" .env
+            sed -i "s|^LONGEVITY_WEB_IMAGE=.*|LONGEVITY_WEB_IMAGE=${{ steps.digests.outputs.web }}|" .env
+            sed -i "s|^LONGEVITY_COMMIT_SHA=.*|LONGEVITY_COMMIT_SHA=${{ github.sha }}|" .env
+
+            # Pull new images
+            docker compose -f compose/docker-compose.prod.yml pull longevity longevity-api
+
+            # Run migrations before switching traffic (uses compiled dist/db/migrate.js)
+            docker compose -f compose/docker-compose.prod.yml run --rm \
+              --entrypoint node longevity-api dist/db/migrate.js
+
+            # Restart only the longevity services — zero downtime for everything else
+            docker compose -f compose/docker-compose.prod.yml up -d --no-deps --wait \
+              longevity longevity-api
+
+            # Healthcheck
+            curl -fsS --retry 6 --retry-delay 5 \
+              https://longevity.maxrommel.de/api/healthz
 
       - name: Rollback on failure
         if: failure()
@@ -66,8 +96,8 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /opt/longevity
-            PREV_SHA=$(docker inspect ghcr.io/max-imalgutaussehend/longevity-backend:previous --format '{{.Id}}' 2>/dev/null || echo "")
-            if [ -n "$PREV_SHA" ]; then
-              docker compose up -d --wait
-            fi
+            cd /opt/life-server
+            # Restore previous image tags
+            docker compose -f compose/docker-compose.prod.yml up -d --no-deps \
+              longevity longevity-api || true
+            echo "Rollback attempted — check container state manually"
