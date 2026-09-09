@@ -53,7 +53,7 @@ networks:
     internal: true
   edge:
     external: true
-    name: ${ENV_PREFIX_NAME:-prod-}net-edge
+    name: longevity-edge
 
 volumes:
   db_data:
