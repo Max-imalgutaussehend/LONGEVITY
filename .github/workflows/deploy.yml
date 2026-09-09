@@ -99,6 +99,9 @@ jobs:
             cd "$DEPLOY_DIR"
             COMPOSE="docker compose --env-file .env -f compose.prod.yml"
 
+            # Authenticate to GHCR so the server can pull private images
+            echo '${{ secrets.GHCR_TOKEN }}' | docker login ghcr.io -u max-imalgutaussehend --password-stdin
+
             $COMPOSE pull
 
             $COMPOSE run --rm --entrypoint node api dist/db/migrate.js
