@@ -49,6 +49,7 @@ jobs:
           cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm db:migrate
       - run: pnpm test
 
   frontend:
