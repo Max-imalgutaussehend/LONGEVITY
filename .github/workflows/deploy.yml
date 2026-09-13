@@ -93,20 +93,22 @@ jobs:
             fi
 
             # Write longevity-only .env
-            printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nGOOGLE_REDIRECT_URI=%s\n' \
-              '${{ steps.digests.outputs.api }}' \
-              '${{ steps.digests.outputs.web }}' \
-              '${{ github.sha }}' \
-              "$PG_PASS" \
-              "$SESSION" \
-              "$ENV_PREFIX" \
-              '${{ secrets.PUBLIC_BASE_URL || 'https://longevity.maxrommel.de' }}' \
-              "$G_CLIENT_ID" \
-              "$G_CLIENT_SECRET" \
-              "$G_CLIENT_ID" \
-              "$G_CLIENT_SECRET" \
-              "$G_REDIRECT_URI" \
-              > "$DEPLOY_DIR/.env"
+            cat <<EOF > "$DEPLOY_DIR/.env"
+LONGEVITY_API_IMAGE=${{ steps.digests.outputs.api }}
+LONGEVITY_WEB_IMAGE=${{ steps.digests.outputs.web }}
+LONGEVITY_COMMIT_SHA=${{ github.sha }}
+POSTGRES_LONGEVITY_PASSWORD=$PG_PASS
+LONGEVITY_SESSION_SECRET=$SESSION
+ENV_PREFIX_NAME=$ENV_PREFIX
+PUBLIC_BASE_URL=${{ secrets.PUBLIC_BASE_URL || 'https://longevity.maxrommel.de' }}
+GOOGLE_FIT_CLIENT_ID=$G_CLIENT_ID
+GOOGLE_FIT_CLIENT_SECRET=$G_CLIENT_SECRET
+GOOGLE_HEALTH_CLIENT_ID=$G_CLIENT_ID
+GOOGLE_HEALTH_CLIENT_SECRET=$G_CLIENT_SECRET
+EOF
+            if [ -n "$G_REDIRECT_URI" ]; then
+              echo "GOOGLE_REDIRECT_URI=$G_REDIRECT_URI" >> "$DEPLOY_DIR/.env"
+            fi
 
             # Ensure Caddy knows about longevity — append if not present
             CADDY_FILE=/opt/life-server/compose/generated/caddy/Caddyfile
