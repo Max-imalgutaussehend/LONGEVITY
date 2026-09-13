@@ -93,7 +93,7 @@ jobs:
             fi
 
             # Write longevity-only .env
-            printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nGOOGLE_REDIRECT_URI=%s\n' \
+            printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\n' \
               '${{ steps.digests.outputs.api }}' \
               '${{ steps.digests.outputs.web }}' \
               '${{ github.sha }}' \
@@ -105,8 +105,11 @@ jobs:
               "$G_CLIENT_SECRET" \
               "$G_CLIENT_ID" \
               "$G_CLIENT_SECRET" \
-              "$G_REDIRECT_URI" \
               > "$DEPLOY_DIR/.env"
+
+            if [ -n "$G_REDIRECT_URI" ]; then
+              printf 'GOOGLE_REDIRECT_URI=%s\n' "$G_REDIRECT_URI" >> "$DEPLOY_DIR/.env"
+            fi
 
             # Ensure Caddy knows about longevity — append if not present
             CADDY_FILE=/opt/life-server/compose/generated/caddy/Caddyfile
