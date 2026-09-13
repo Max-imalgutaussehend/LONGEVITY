@@ -26,6 +26,8 @@ services:
       SESSION_SECRET: ${LONGEVITY_SESSION_SECRET}
       NODE_ENV: production
       COMMIT_SHA: ${LONGEVITY_COMMIT_SHA:-unknown}
+      GOOGLE_FIT_CLIENT_ID: ${GOOGLE_FIT_CLIENT_ID}
+      GOOGLE_FIT_CLIENT_SECRET: ${GOOGLE_FIT_CLIENT_SECRET}
     networks:
       - internal
       - edge
