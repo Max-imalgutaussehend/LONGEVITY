@@ -28,8 +28,8 @@ jobs:
     env:
       DATABASE_URL: postgres://longevity:longevity_test@localhost:5432/longevity_test
       SESSION_SECRET: test-session-secret-32-bytes-long!
-      SIGNING_KEY_PRIVATE: ${{ secrets.SIGNING_KEY_PRIVATE }}
-      SIGNING_KEY_PUBLIC: ${{ secrets.SIGNING_KEY_PUBLIC }}
+      SIGNING_KEY_PRIVATE: ${{ secrets.SIGNING_KEY_PRIVATE || 'ci-test-placeholder-private' }}
+      SIGNING_KEY_PUBLIC: ${{ secrets.SIGNING_KEY_PUBLIC || 'ci-test-placeholder-public' }}
       PUBLIC_BASE_URL: http://localhost
       SMTP_URL: smtp://localhost:1025
       NODE_ENV: test
@@ -49,6 +49,7 @@ jobs:
           cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm lint
       - run: pnpm db:migrate
       - run: pnpm test
 
@@ -73,4 +74,5 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm lint
       - run: pnpm test

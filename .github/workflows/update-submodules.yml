@@ -1,0 +1,50 @@
+name: Update Submodule Pointer
+
+on:
+  repository_dispatch:
+    types: [submodule-updated]
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'Submodule to update (backend or frontend)'
+        required: false
+        default: ''
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_SUBMODULE_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update backend submodule
+        if: ${{ github.event.client_payload.repo == 'backend' || github.event.inputs.repo == 'backend' || (github.event.client_payload.repo == '' && github.event.inputs.repo == '') }}
+        run: |
+          git submodule update --remote backend
+          if ! git diff --quiet backend; then
+            SHA=$(git -C backend rev-parse --short HEAD)
+            git add backend
+            git commit -m "chore: update backend submodule to ${SHA}"
+          fi
+
+      - name: Update frontend submodule
+        if: ${{ github.event.client_payload.repo == 'frontend' || github.event.inputs.repo == 'frontend' || (github.event.client_payload.repo == '' && github.event.inputs.repo == '') }}
+        run: |
+          git submodule update --remote frontend
+          if ! git diff --quiet frontend; then
+            SHA=$(git -C frontend rev-parse --short HEAD)
+            git add frontend
+            git commit -m "chore: update frontend submodule to ${SHA}"
+          fi
+
+      - name: Push
+        run: git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_SUBMODULE_TOKEN }}
