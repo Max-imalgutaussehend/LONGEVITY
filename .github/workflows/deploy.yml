@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -129,6 +130,9 @@ jobs:
             $COMPOSE run --rm --entrypoint node api dist/db/migrate.js
 
             $COMPOSE up -d --wait
+
+            # Prune old images older than 72h to keep server disk healthy
+            docker image prune -af --filter "until=72h" || true
 
             curl -fsS --retry 6 --retry-delay 5 \
               https://longevity.maxrommel.de/api/healthz

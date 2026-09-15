@@ -1,0 +1,23 @@
+name: Ops
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Command to run on life-server'
+        required: true
+        default: 'docker ps && docker logs --tail 50 prod-longevity-db && df -h'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Execute command on life-server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            ${{ github.event.inputs.command }}
