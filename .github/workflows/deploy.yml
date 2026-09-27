@@ -144,6 +144,22 @@ jobs:
               MAIL_FROM_V="LONGEVITY <contact@maxrommel.de>"
             fi
 
+            # Ed25519 signing keys: required in production (backend refuses to
+            # boot without them). Prefer GitHub secrets; fall back to the PEM
+            # files already provisioned on the server.
+            SIGNING_KEY_PRIVATE_V="${{ secrets.SIGNING_KEY_PRIVATE }}"
+            if [ -z "$SIGNING_KEY_PRIVATE_V" ] && [ -f /opt/life-server/secrets/longevity_signing_private.pem ]; then
+              SIGNING_KEY_PRIVATE_V=$(cat /opt/life-server/secrets/longevity_signing_private.pem)
+            fi
+            SIGNING_KEY_PUBLIC_V="${{ secrets.SIGNING_KEY_PUBLIC }}"
+            if [ -z "$SIGNING_KEY_PUBLIC_V" ] && [ -f /opt/life-server/secrets/longevity_signing_public.pem ]; then
+              SIGNING_KEY_PUBLIC_V=$(cat /opt/life-server/secrets/longevity_signing_public.pem)
+            fi
+            if [ -z "$SIGNING_KEY_PRIVATE_V" ] || [ -z "$SIGNING_KEY_PUBLIC_V" ]; then
+              echo "::error::SIGNING_KEY_PRIVATE/SIGNING_KEY_PUBLIC not found in secrets or at /opt/life-server/secrets/longevity_signing_*.pem — production requires both."
+              exit 1
+            fi
+
             # Write longevity-only .env
             printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nWITHINGS_CLIENT_ID=%s\nWITHINGS_CLIENT_SECRET=%s\nOURA_CLIENT_ID=%s\nOURA_CLIENT_SECRET=%s\nSTRAVA_CLIENT_ID=%s\nSTRAVA_CLIENT_SECRET=%s\nSMTP_HOST=%s\nSMTP_USER=%s\nSMTP_PORT=%s\nSMTP_PASS=%s\nMAIL_FROM=%s\n' \
               '${{ steps.digests.outputs.api }}' \
@@ -169,6 +185,14 @@ jobs:
               "$SMTP_PASS_V" \
               "$MAIL_FROM_V" \
               > "$DEPLOY_DIR/.env"
+
+            # Multi-line PEM values need double-quoting so docker compose's
+            # env-file parser preserves the embedded newlines — appended
+            # separately rather than through the single-line printf above.
+            {
+              printf 'SIGNING_KEY_PRIVATE="%s"\n' "$SIGNING_KEY_PRIVATE_V"
+              printf 'SIGNING_KEY_PUBLIC="%s"\n' "$SIGNING_KEY_PUBLIC_V"
+            } >> "$DEPLOY_DIR/.env"
 
             if [ -n "$G_REDIRECT_URI" ]; then
               printf 'GOOGLE_REDIRECT_URI=%s\n' "$G_REDIRECT_URI" >> "$DEPLOY_DIR/.env"
