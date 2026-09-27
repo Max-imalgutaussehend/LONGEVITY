@@ -174,12 +174,40 @@ jobs:
               printf 'GOOGLE_REDIRECT_URI=%s\n' "$G_REDIRECT_URI" >> "$DEPLOY_DIR/.env"
             fi
 
-            # Ensure Caddy knows about longevity — append if not present
+            # Ensure Caddy has the current longevity block — replace the
+            # marked section on every deploy (not just once) so hardening
+            # changes here (HSTS, security headers, ...) actually reach
+            # prod instead of being frozen at whatever was first appended.
             CADDY_FILE=/opt/life-server/compose/generated/caddy/Caddyfile
-            if ! grep -q 'longevity' "$CADDY_FILE"; then
-              printf '\n# ── longevity — Health Score App\nhttp://longevity{$ENV_PREFIX}.{$DOMAIN} {\n\treverse_proxy /api/* {$ENV_PREFIX_NAME}longevity-api:3000\n\treverse_proxy * {$ENV_PREFIX_NAME}longevity:8082\n}\n' >> "$CADDY_FILE"
-              docker exec $(docker ps -qf name=caddy) caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
+            NEW_BLOCK_FILE=$(mktemp)
+            {
+              printf '%s\n' '# ── longevity begin ──'
+              printf '%s\n' 'http://longevity{$ENV_PREFIX}.{$DOMAIN} {'
+              printf '\t%s\n' 'header {'
+              printf '\t\t%s\n' 'Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"'
+              printf '\t\t%s\n' 'X-Frame-Options "DENY"'
+              printf '\t\t%s\n' 'X-Content-Type-Options "nosniff"'
+              printf '\t\t%s\n' 'Referrer-Policy "strict-origin-when-cross-origin"'
+              printf '\t%s\n' '}'
+              printf '\t%s\n' 'reverse_proxy /api/* {$ENV_PREFIX_NAME}longevity-api:3000'
+              printf '\t%s\n' 'reverse_proxy * {$ENV_PREFIX_NAME}longevity:8082'
+              printf '%s\n' '}'
+              printf '%s\n' '# ── longevity end ──'
+            } > "$NEW_BLOCK_FILE"
+
+            if grep -qF '# ── longevity begin ──' "$CADDY_FILE"; then
+              awk -v blockfile="$NEW_BLOCK_FILE" '
+                /# ── longevity begin ──/ { skip = 1; while ((getline line < blockfile) > 0) print line; close(blockfile) }
+                /# ── longevity end ──/ { skip = 0; next }
+                skip { next }
+                { print }
+              ' "$CADDY_FILE" > "${CADDY_FILE}.tmp" && mv "${CADDY_FILE}.tmp" "$CADDY_FILE"
+            else
+              printf '\n' >> "$CADDY_FILE"
+              cat "$NEW_BLOCK_FILE" >> "$CADDY_FILE"
             fi
+            rm -f "$NEW_BLOCK_FILE"
+            docker exec $(docker ps -qf name=caddy) caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
 
             cd "$DEPLOY_DIR"
             COMPOSE="docker compose --env-file .env -f compose.prod.yml"
