@@ -47,7 +47,14 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: VITE_API_BASE_URL=/api
+          build-args: |
+            VITE_API_BASE_URL=/api
+            VITE_COMMIT_SHA=${{ github.sha }}
+            VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
+          secret-envs: |
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
           tags: |
             ghcr.io/max-imalgutaussehend/longevity-frontend:${{ github.sha }}
             ghcr.io/max-imalgutaussehend/longevity-frontend:latest
@@ -172,6 +179,12 @@ jobs:
 
             if [ -n "$G_REDIRECT_URI" ]; then
               printf 'GOOGLE_REDIRECT_URI=%s\n' "$G_REDIRECT_URI" >> "$DEPLOY_DIR/.env"
+            fi
+
+            # Optional: Sentry error tracking (leave secrets blank to disable)
+            SENTRY_DSN_BACKEND_V="${{ secrets.SENTRY_DSN_BACKEND }}"
+            if [ -n "$SENTRY_DSN_BACKEND_V" ]; then
+              printf 'SENTRY_DSN_BACKEND=%s\n' "$SENTRY_DSN_BACKEND_V" >> "$DEPLOY_DIR/.env"
             fi
 
             # Ensure Caddy knows about longevity — append if not present
