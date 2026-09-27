@@ -159,6 +159,8 @@ jobs:
               echo "::error::SIGNING_KEY_PRIVATE/SIGNING_KEY_PUBLIC not found in secrets or at /opt/life-server/secrets/longevity_signing_*.pem — production requires both."
               exit 1
             fi
+            echo "DIAG: private_len=${#SIGNING_KEY_PRIVATE_V} private_lines=$(printf '%s' "$SIGNING_KEY_PRIVATE_V" | wc -l) private_has_begin=$(printf '%s' "$SIGNING_KEY_PRIVATE_V" | grep -c 'BEGIN PRIVATE KEY' || true)"
+            echo "DIAG: public_len=${#SIGNING_KEY_PUBLIC_V} public_lines=$(printf '%s' "$SIGNING_KEY_PUBLIC_V" | wc -l) public_has_begin=$(printf '%s' "$SIGNING_KEY_PUBLIC_V" | grep -c 'BEGIN PUBLIC KEY' || true)"
 
             # Write longevity-only .env
             printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nWITHINGS_CLIENT_ID=%s\nWITHINGS_CLIENT_SECRET=%s\nOURA_CLIENT_ID=%s\nOURA_CLIENT_SECRET=%s\nSTRAVA_CLIENT_ID=%s\nSTRAVA_CLIENT_SECRET=%s\nSMTP_HOST=%s\nSMTP_USER=%s\nSMTP_PORT=%s\nSMTP_PASS=%s\nMAIL_FROM=%s\n' \
