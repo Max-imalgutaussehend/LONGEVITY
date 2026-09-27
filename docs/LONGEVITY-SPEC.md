@@ -232,7 +232,7 @@ ausgewiesen — sie sind Diagnostik, nicht die Kennzahl.
 ### 5.3 Abgeleitete Größen
 
 ```
-Vitalitätsalter = clamp(chronoAlter − (finalScore − 50) / 10,
+Vitalitätsalter = clamp(chronoAlter − (finalScore − 50) / 3.33,
                         chronoAlter − 15, chronoAlter + 15)
 Band            = [floor(finalScore / 10) · 10, +9]
 ```
