@@ -174,8 +174,14 @@ jobs:
               exit 1
             fi
 
+            PASSWORD_PEPPER_V="${{ secrets.PASSWORD_PEPPER }}"
+            if [ -z "$PASSWORD_PEPPER_V" ]; then
+              echo "::error::PASSWORD_PEPPER secret not set — production requires a real pepper (16+ chars), not the empty string docker compose would otherwise substitute."
+              exit 1
+            fi
+
             # Write longevity-only .env
-            printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nWITHINGS_CLIENT_ID=%s\nWITHINGS_CLIENT_SECRET=%s\nOURA_CLIENT_ID=%s\nOURA_CLIENT_SECRET=%s\nSTRAVA_CLIENT_ID=%s\nSTRAVA_CLIENT_SECRET=%s\nSMTP_HOST=%s\nSMTP_USER=%s\nSMTP_PORT=%s\nSMTP_PASS=%s\nMAIL_FROM=%s\n' \
+            printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nWITHINGS_CLIENT_ID=%s\nWITHINGS_CLIENT_SECRET=%s\nOURA_CLIENT_ID=%s\nOURA_CLIENT_SECRET=%s\nSTRAVA_CLIENT_ID=%s\nSTRAVA_CLIENT_SECRET=%s\nSMTP_HOST=%s\nSMTP_USER=%s\nSMTP_PORT=%s\nSMTP_PASS=%s\nMAIL_FROM=%s\nPASSWORD_PEPPER=%s\n' \
               '${{ steps.digests.outputs.api }}' \
               '${{ steps.digests.outputs.web }}' \
               '${{ github.sha }}' \
@@ -198,6 +204,7 @@ jobs:
               "$SMTP_PORT_V" \
               "$SMTP_PASS_V" \
               "$MAIL_FROM_V" \
+              "$PASSWORD_PEPPER_V" \
               > "$DEPLOY_DIR/.env"
 
             # Multi-line PEM values need double-quoting so docker compose's
