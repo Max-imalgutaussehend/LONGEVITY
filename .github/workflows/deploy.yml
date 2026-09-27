@@ -51,10 +51,6 @@ jobs:
             VITE_API_BASE_URL=/api
             VITE_COMMIT_SHA=${{ github.sha }}
             VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
-          secret-envs: |
-            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
-            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
           tags: |
             ghcr.io/max-imalgutaussehend/longevity-frontend:${{ github.sha }}
             ghcr.io/max-imalgutaussehend/longevity-frontend:latest
