@@ -43,6 +43,9 @@ services:
       SMTP_PORT: ${SMTP_PORT}
       SMTP_PASS: ${SMTP_PASS}
       MAIL_FROM: ${MAIL_FROM}
+      PASSWORD_PEPPER: ${PASSWORD_PEPPER}
+      SIGNING_KEY_PRIVATE: ${SIGNING_KEY_PRIVATE}
+      SIGNING_KEY_PUBLIC: ${SIGNING_KEY_PUBLIC}
     networks:
       - internal
       - edge
