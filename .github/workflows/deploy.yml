@@ -60,6 +60,15 @@ jobs:
           echo "api=ghcr.io/max-imalgutaussehend/longevity-backend@${API_DIGEST}" >> $GITHUB_OUTPUT
           echo "web=ghcr.io/max-imalgutaussehend/longevity-frontend@${WEB_DIGEST}" >> $GITHUB_OUTPUT
 
+      - name: Copy compose file to life-server
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          source: "infra/compose.prod.yml"
+          target: "/opt/life-server/longevity"
+
       - name: Deploy to life-server
         uses: appleboy/ssh-action@v1
         with:
@@ -71,9 +80,12 @@ jobs:
 
             mkdir -p /opt/life-server/longevity
 
-            # Deploy compose file (base64-encoded to avoid heredoc issues in ssh-action)
+            # compose.prod.yml is copied directly from the repo (previous step)
+            # instead of a hardcoded base64 blob here, which had silently
+            # drifted out of sync with infra/compose.prod.yml for multiple
+            # releases (missing PASSWORD_PEPPER/SIGNING_KEY_* env wiring that
+            # newer backend code requires to boot in production).
             DEPLOY_DIR=/opt/life-server/longevity
-            echo 'c2VydmljZXM6CiAgZGI6CiAgICBpbWFnZTogcG9zdGdyZXM6MTYtYWxwaW5lCiAgICByZXN0YXJ0OiB1bmxlc3Mtc3RvcHBlZAogICAgY29udGFpbmVyX25hbWU6ICR7RU5WX1BSRUZJWF9OQU1FOi1wcm9kLX1sb25nZXZpdHktZGIKICAgIGVudmlyb25tZW50OgogICAgICBQT1NUR1JFU19EQjogbG9uZ2V2aXR5CiAgICAgIFBPU1RHUkVTX1VTRVI6IGxvbmdldml0eQogICAgICBQT1NUR1JFU19QQVNTV09SRDogJHtQT1NUR1JFU19MT05HRVZJVFlfUEFTU1dPUkR9CiAgICB2b2x1bWVzOgogICAgICAtIGRiX2RhdGE6L3Zhci9saWIvcG9zdGdyZXNxbC9kYXRhCiAgICBuZXR3b3JrczoKICAgICAgLSBpbnRlcm5hbAogICAgaGVhbHRoY2hlY2s6CiAgICAgIHRlc3Q6IFsiQ01ELVNIRUxMIiwgInBnX2lzcmVhZHkgLVUgbG9uZ2V2aXR5Il0KICAgICAgaW50ZXJ2YWw6IDVzCiAgICAgIHRpbWVvdXQ6IDVzCiAgICAgIHJldHJpZXM6IDEwCgogIGFwaToKICAgIGltYWdlOiAke0xPTkdFVklUWV9BUElfSU1BR0V9CiAgICByZXN0YXJ0OiB1bmxlc3Mtc3RvcHBlZAogICAgY29udGFpbmVyX25hbWU6ICR7RU5WX1BSRUZJWF9OQU1FOi1wcm9kLX1sb25nZXZpdHktYXBpCiAgICBlbnZpcm9ubWVudDoKICAgICAgREFUQUJBU0VfVVJMOiBwb3N0Z3JlczovL2xvbmdldml0eToke1BPU1RHUkVTX0xPTkdFVklUWV9QQVNTV09SRH1AJHtFTlZfUFJFRklYX05BTUU6LXByb2QtfWxvbmdldml0eS1kYjo1NDMyL2xvbmdldml0eQogICAgICBTRVNTSU9OX1NFQ1JFVDogJHtMT05HRVZJVFlfU0VTU0lPTl9TRUNSRVR9CiAgICAgIE5PREVfRU5WOiBwcm9kdWN0aW9uCiAgICAgIENPTU1JVF9TSEE6ICR7TE9OR0VWSVRZX0NPTU1JVF9TSEE6LXVua25vd259CiAgICAgIFBVQkxJQ19CQVNFX1VSTDogJHtQVUJMSUNfQkFTRV9VUkw6LWh0dHBzOi8vbG9uZ2V2aXR5Lm1heHJvbW1lbC5kZX0KICAgICAgR09PR0xFX0ZJVF9DTElFTlRfSUQ6ICR7R09PR0xFX0ZJVF9DTElFTlRfSUR9CiAgICAgIEdPT0dMRV9GSVRfQ0xJRU5UX1NFQ1JFVDogJHtHT09HTEVfRklUX0NMSUVOVF9TRUNSRVR9CiAgICAgIEdPT0dMRV9IRUFMVEhfQ0xJRU5UX0lEOiAke0dPT0dMRV9IRUFMVEhfQ0xJRU5UX0lEfQogICAgICBHT09HTEVfSEVBTFRIX0NMSUVOVF9TRUNSRVQ6ICR7R09PR0xFX0hFQUxUSF9DTElFTlRfU0VDUkVUfQogICAgICBHT09HTEVfUkVESVJFQ1RfVVJJOiAke0dPT0dMRV9SRURJUkVDVF9VUkl9CiAgICAgIFdJVEhJTkdTX0NMSUVOVF9JRDogJHtXSVRISU5HU19DTElFTlRfSUR9CiAgICAgIFdJVEhJTkdTX0NMSUVOVF9TRUNSRVQ6ICR7V0lUSElOR1NfQ0xJRU5UX1NFQ1JFVH0KICAgICAgT1VSQV9DTElFTlRfSUQ6ICR7T1VSQV9DTElFTlRfSUR9CiAgICAgIE9VUkFfQ0xJRU5UX1NFQ1JFVDogJHtPVVJBX0NMSUVOVF9TRUNSRVR9CiAgICAgIFNUUkFWQV9DTElFTlRfSUQ6ICR7U1RSQVZBX0NMSUVOVF9JRH0KICAgICAgU1RSQVZBX0NMSUVOVF9TRUNSRVQ6ICR7U1RSQVZBX0NMSUVOVF9TRUNSRVR9CiAgICAgIFNNVFBfSE9TVDogJHtTTVRQX0hPU1R9CiAgICAgIFNNVFBfVVNFUjogJHtTTVRQX1VTRVJ9CiAgICAgIFNNVFBfUE9SVDogJHtTTVRQX1BPUlR9CiAgICAgIFNNVFBfUEFTUzogJHtTTVRQX1BBU1N9CiAgICAgIE1BSUxfRlJPTTogJHtNQUlMX0ZST019CiAgICBuZXR3b3JrczoKICAgICAgLSBpbnRlcm5hbAogICAgICAtIGVkZ2UKICAgIGRlcGVuZHNfb246CiAgICAgIGRiOgogICAgICAgIGNvbmRpdGlvbjogc2VydmljZV9oZWFsdGh5CiAgICBoZWFsdGhjaGVjazoKICAgICAgdGVzdDogWyJDTUQtU0hFTEwiLCAid2dldCAtcU8tIGh0dHA6Ly8xMjcuMC4wLjE6MzAwMC9hcGkvaGVhbHRoeiB8fCBleGl0IDEiXQogICAgICBpbnRlcnZhbDogMTBzCiAgICAgIHRpbWVvdXQ6IDVzCiAgICAgIHJldHJpZXM6IDYKCiAgd2ViOgogICAgaW1hZ2U6ICR7TE9OR0VWSVRZX1dFQl9JTUFHRX0KICAgIHJlc3RhcnQ6IHVubGVzcy1zdG9wcGVkCiAgICBjb250YWluZXJfbmFtZTogJHtFTlZfUFJFRklYX05BTUU6LXByb2QtfWxvbmdldml0eQogICAgbmV0d29ya3M6CiAgICAgIC0gaW50ZXJuYWwKICAgICAgLSBlZGdlCiAgICBkZXBlbmRzX29uOgogICAgICAtIGFwaQoKbmV0d29ya3M6CiAgaW50ZXJuYWw6CiAgICBpbnRlcm5hbDogdHJ1ZQogIGVkZ2U6CiAgICBleHRlcm5hbDogdHJ1ZQogICAgbmFtZTogbG9uZ2V2aXR5LWVkZ2UKCnZvbHVtZXM6CiAgZGJfZGF0YToK' | base64 -d > "$DEPLOY_DIR/compose.prod.yml"
 
             # Fetch shared secrets from life-server .env
             PG_PASS=$(grep ^POSTGRES_LONGEVITY_PASSWORD /opt/life-server/.env | cut -d= -f2)
@@ -159,8 +171,6 @@ jobs:
               echo "::error::SIGNING_KEY_PRIVATE/SIGNING_KEY_PUBLIC not found in secrets or at /opt/life-server/secrets/longevity_signing_*.pem — production requires both."
               exit 1
             fi
-            echo "DIAG: private_len=${#SIGNING_KEY_PRIVATE_V} private_lines=$(printf '%s' "$SIGNING_KEY_PRIVATE_V" | wc -l) private_has_begin=$(printf '%s' "$SIGNING_KEY_PRIVATE_V" | grep -c 'BEGIN PRIVATE KEY' || true)"
-            echo "DIAG: public_len=${#SIGNING_KEY_PUBLIC_V} public_lines=$(printf '%s' "$SIGNING_KEY_PUBLIC_V" | wc -l) public_has_begin=$(printf '%s' "$SIGNING_KEY_PUBLIC_V" | grep -c 'BEGIN PUBLIC KEY' || true)"
 
             # Write longevity-only .env
             printf 'LONGEVITY_API_IMAGE=%s\nLONGEVITY_WEB_IMAGE=%s\nLONGEVITY_COMMIT_SHA=%s\nPOSTGRES_LONGEVITY_PASSWORD=%s\nLONGEVITY_SESSION_SECRET=%s\nENV_PREFIX_NAME=%s\nPUBLIC_BASE_URL=%s\nGOOGLE_FIT_CLIENT_ID=%s\nGOOGLE_FIT_CLIENT_SECRET=%s\nGOOGLE_HEALTH_CLIENT_ID=%s\nGOOGLE_HEALTH_CLIENT_SECRET=%s\nWITHINGS_CLIENT_ID=%s\nWITHINGS_CLIENT_SECRET=%s\nOURA_CLIENT_ID=%s\nOURA_CLIENT_SECRET=%s\nSTRAVA_CLIENT_ID=%s\nSTRAVA_CLIENT_SECRET=%s\nSMTP_HOST=%s\nSMTP_USER=%s\nSMTP_PORT=%s\nSMTP_PASS=%s\nMAIL_FROM=%s\n' \
