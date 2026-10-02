@@ -2,12 +2,12 @@
 
 | Datei           | Kurzbeschreibung                            |
 | --------------- | ------------------------------------------- |
-| start.sh        | Setupskript für die lokale Entwicklung      |
-| compose.dev.yml | Docker Compose für DB, Mailpit, API und Web |
-| Caddyfile       | Reverse-Proxy                               |
-| index.ts        | Server-Einstiegspunkt                       |
-| app.ts          | Fastify, Security und Routenregistrierung   |
-| env.ts          | Umgebungsvariablen                          |
+| [start.sh](../start.sh)        | Setupskript für die lokale Entwicklung      |
+| [compose.dev.yml](../infra/compose.dev.yml) | Docker Compose für DB, Mailpit, API und Web |
+| [Caddyfile](../infra/Caddyfile)       | Reverse-Proxy                               |
+| [index.ts](../backend/src/index.ts)        | Server-Einstiegspunkt                       |
+| [app.ts](../backend/src/app.ts)          | Fastify, Security und Routenregistrierung   |
+| [env.ts](../backend/src/env.ts)          | Umgebungsvariablen                          |
 
 ---
 
@@ -15,13 +15,13 @@
 
 | Datei            | Kurzbeschreibung                                         |
 | ---------------- | -------------------------------------------------------- |
-| index.ts         | Score-Berechnung (0–100), Vitalitätsalter & Hebel-Finder |
-| metrics.ts       | Katalog der 15 Vitalmetriken mit Gewichtungen            |
-| reference.ts     | Klinische Referenztabellen nach Alter und Geschlecht     |
-| stats.ts         | Gaußsche Fehlerfunktion erf, CDF Φ(z) & Clamping         |
-| plausibility.ts  | Physiologische Grenzwert- & Plausibilitätsprüfungen      |
-| holdingPeriod.ts | Validierung stabiler Score-Halteperioden (z. B. 60 Tage) |
-| types.ts         | Domänen-Typen für Messwerte, Domänen und Scores          |
+| [index.ts](../backend/src/score/index.ts)         | Score-Berechnung (0–100), Vitalitätsalter & Hebel-Finder |
+| [metrics.ts](../backend/src/score/metrics.ts)       | Katalog der 15 Vitalmetriken mit Gewichtungen            |
+| [reference.ts](../backend/src/score/reference.ts)     | Klinische Referenztabellen nach Alter und Geschlecht     |
+| [stats.ts](../backend/src/score/stats.ts)         | Gaußsche Fehlerfunktion erf, CDF Φ(z) & Clamping         |
+| [plausibility.ts](../backend/src/score/plausibility.ts)  | Physiologische Grenzwert- & Plausibilitätsprüfungen      |
+| [holdingPeriod.ts](../backend/src/score/holdingPeriod.ts) | Validierung stabiler Score-Halteperioden (z. B. 60 Tage) |
+| [types.ts](../backend/src/score/types.ts)         | Domänen-Typen für Messwerte, Domänen und Scores          |
 
 ---
 
@@ -29,13 +29,13 @@
 
 | Datei             | Kurzbeschreibung              |
 | ----------------- | ----------------------------- |
-| appleHealth.ts    | Apple Health Datenimport      |
-| appleHealthZip.ts | Apple Health Datenimport      |
-| oura.ts           | Oura Ring API-Adapter         |
-| withings.ts       | Withings API-Adapter          |
-| strava.ts         | Strava API-Adapter            |
-| googleFit.ts      | Google Fit API-Adapter        |
-| fhir.ts           | Parsing von Laborwertimporten |
+| [appleHealth.ts](../backend/src/adapters/appleHealth.ts)    | Apple Health Datenimport      |
+| [appleHealthZip.ts](../backend/src/adapters/appleHealthZip.ts) | Apple Health Datenimport      |
+| [oura.ts](../backend/src/adapters/oura.ts)           | Oura Ring API-Adapter         |
+| [withings.ts](../backend/src/adapters/withings.ts)       | Withings API-Adapter          |
+| [strava.ts](../backend/src/adapters/strava.ts)         | Strava API-Adapter            |
+| [googleFit.ts](../backend/src/adapters/googleFit.ts)      | Google Fit API-Adapter        |
+| [fhir.ts](../backend/src/adapters/fhir.ts)           | Parsing von Laborwertimporten |
 |                   |                               |
 
 ---
@@ -44,14 +44,14 @@
 
 | Datei             | Kurzbeschreibung                                   |
 | ----------------- | -------------------------------------------------- |
-| signing.ts        | Health Score Signatur                              |
-| password.ts       | Passworthashing                                    |
-| csrf.ts           | Genereller CSRF-Schutz                             |
-| oauthState.ts     | Schutz gegen Login-CSRF                            |
-| pgSessionStore.ts | Nutzersession-Persistierung                        |
-| kvnr.ts           | Validierung und Sicherung von Krankenkassennummern |
-| sampleImport.ts   | Testdatenimport                                    |
-| mail.ts           | Client für die E-Mail-Kommunikation                |
+| [signing.ts](../backend/src/lib/signing.ts)        | Health Score Signatur                              |
+| [password.ts](../backend/src/lib/password.ts)       | Passworthashing                                    |
+| [csrf.ts](../backend/src/lib/csrf.ts)           | Genereller CSRF-Schutz                             |
+| [oauthState.ts](../backend/src/lib/oauthState.ts)     | Schutz gegen Login-CSRF                            |
+| [pgSessionStore.ts](../backend/src/lib/pgSessionStore.ts) | Nutzersession-Persistierung                        |
+| [kvnr.ts](../backend/src/lib/kvnr.ts)           | Validierung und Sicherung von Krankenkassennummern |
+| [sampleImport.ts](../backend/src/lib/sampleImport.ts)   | Testdatenimport                                    |
+| [mail.ts](../backend/src/lib/mail.ts)           | Client für die E-Mail-Kommunikation                |
 |                   |                                                    |
 
 ---
@@ -60,13 +60,13 @@
 
 | Datei      | Kurzbeschreibung                                       |
 | ---------- | ------------------------------------------------------ |
-| auth.ts    | Login, Registrierung, Verifikation & Passwort-Reset    |
-| score.ts   | Endpunkte für aktuellen Score, Verlauf & Simulation    |
-| sources.ts | Quellen-Status, OAuth-Verbindung & Upload-Endpunkte    |
-| share.ts   | Generierung von Freigabe-Tokens & QR-Codes             |
-| insurer.ts | Krankenkassenportal, Mitgliedervorteile & Bonusanträge |
-| reports.ts | Berichte und Auswertungen                              |
-| account.ts | Datenexport und Accountverwaltung                      |
+| [auth.ts](../backend/src/routes/auth.ts)    | Login, Registrierung, Verifikation & Passwort-Reset    |
+| [score.ts](../backend/src/routes/score.ts)   | Endpunkte für aktuellen Score, Verlauf & Simulation    |
+| [sources.ts](../backend/src/routes/sources.ts) | Quellen-Status, OAuth-Verbindung & Upload-Endpunkte    |
+| [share.ts](../backend/src/routes/share.ts)   | Generierung von Freigabe-Tokens & QR-Codes             |
+| [insurer.ts](../backend/src/routes/insurer.ts) | Krankenkassenportal, Mitgliedervorteile & Bonusanträge |
+| [reports.ts](../backend/src/routes/reports.ts) | Berichte und Auswertungen                              |
+| [account.ts](../backend/src/routes/account.ts) | Datenexport und Accountverwaltung                      |
 
 ---
 
@@ -74,9 +74,9 @@
 
 | Datei      | Kurzbeschreibung               |
 | ---------- | ------------------------------ |
-| schema.ts  | Drizzle ORM Schemata           |
-| client.ts  | Datenbankclient für PostgreSQL |
-| migrate.ts | Datenbankmigrationen           |
+| [schema.ts](../backend/src/db/schema.ts)  | Drizzle ORM Schemata           |
+| [client.ts](../backend/src/db/client.ts)  | Datenbankclient für PostgreSQL |
+| [migrate.ts](../backend/src/db/migrate.ts) | Datenbankmigrationen           |
 |            |                                |
 
 ---
@@ -85,14 +85,14 @@
 
 | Datei            | Kurzbeschreibung                                    |
 | ---------------- | --------------------------------------------------- |
-| router.ts        | Routing auf Clientseite und Authentifizierungslogik |
-| client.ts        | HTTP-Client für die Backendkommunikation            |
-| generated.ts     | Interfaces basierend auf der OpenAPI-Spezifikation  |
-| tokens.css       | Look and Feel in Form von Designtoken               |
-| AppShell.tsx     | Nutzerdashboard                                     |
-| PublicShell.tsx  | Landingpage                                         |
-| InsurerShell.tsx | Krankenkassendashboard                              |
-| AdminShell.tsx   | Admindashboard                                      |
+| [router.tsx](../frontend/src/router.tsx)        | Routing auf Clientseite und Authentifizierungslogik |
+| [client.ts](../frontend/src/api/client.ts)        | HTTP-Client für die Backendkommunikation            |
+| [generated.ts](../frontend/src/api/generated.ts)     | Interfaces basierend auf der OpenAPI-Spezifikation  |
+| [tokens.css](../frontend/src/styles/tokens.css)       | Look and Feel in Form von Designtoken               |
+| [AppShell.tsx](../frontend/src/routes/AppShell.tsx)     | Nutzerdashboard                                     |
+| [PublicShell.tsx](../frontend/src/routes/PublicShell.tsx)  | Landingpage                                         |
+| [InsurerShell.tsx](../frontend/src/routes/InsurerShell.tsx) | Krankenkassendashboard                              |
+| [AdminShell.tsx](../frontend/src/routes/AdminShell.tsx)   | Admindashboard                                      |
 |                  |                                                     |
 
 ---
@@ -101,14 +101,14 @@
 
 | Datei                    | Kurzbeschreibung                         |
 | ------------------------ | ---------------------------------------- |
-| Dashboard.tsx            | Score, Vitalitätsalter, Trend und Hebel  |
-| Hebel.tsx                | Hebelsimulator                           |
-| Daten.tsx                | Datenübersicht                           |
-| Freigabe.tsx             | Datenfreigabe für Krankenkassen          |
-| Vorteile.tsx             | Krankenkassenboniübersicht und Einlösung |
-| Verify.tsx               | Zertifikatsprüfung                       |
-| Landing.tsx              | Landingpage                              |
-| Login.tsx / Register.tsx | Authentifizierung & Onboarding           |
-| Report.tsx               | Export der Gesundheitsübersicht          |
-| InsurerOverview.tsx      | Kassen-Dashboard                         |
-| InsurerOffers.tsx        | Verwaltung der Vorteile                  |
+| [Dashboard.tsx](../frontend/src/routes/Dashboard.tsx)            | Score, Vitalitätsalter, Trend und Hebel  |
+| [Hebel.tsx](../frontend/src/routes/Hebel.tsx)                | Hebelsimulator                           |
+| [Daten.tsx](../frontend/src/routes/Daten.tsx)                | Datenübersicht                           |
+| [Freigabe.tsx](../frontend/src/routes/Freigabe.tsx)             | Datenfreigabe für Krankenkassen          |
+| [Vorteile.tsx](../frontend/src/routes/Vorteile.tsx)             | Krankenkassenboniübersicht und Einlösung |
+| [Verify.tsx](../frontend/src/routes/Verify.tsx)               | Zertifikatsprüfung                       |
+| [Landing.tsx](../frontend/src/routes/Landing.tsx)              | Landingpage                              |
+| [Login.tsx](../frontend/src/routes/Login.tsx) / [Register.tsx](../frontend/src/routes/Register.tsx) | Authentifizierung & Onboarding           |
+| [Report.tsx](../frontend/src/routes/Report.tsx)               | Export der Gesundheitsübersicht          |
+| [InsurerOverview.tsx](../frontend/src/routes/InsurerOverview.tsx)      | Kassen-Dashboard                         |
+| [InsurerOffers.tsx](../frontend/src/routes/InsurerOffers.tsx)        | Verwaltung der Vorteile                  |
