@@ -2,7 +2,7 @@ LONGEVITY — Health Score Platform
 
 ## Setup (lokal)
 
-### 🚀 Schnellstart (One-Command-Setup)
+### Schnellstart
 
 Für das gesamte lokale Entwicklungssetup (Submodule, Keys, Docker-Container, Migrationen und Demo-Daten) genügt ein einziger Befehl:
 
