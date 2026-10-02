@@ -1,4 +1,4 @@
-LONGEVITY — Health Score Platform
+# LONGEVITY — Health Score Platform
 
 ## Setup (lokal)
 
