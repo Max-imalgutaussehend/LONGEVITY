@@ -2,11 +2,11 @@
 
 | Datei           | Kurzbeschreibung                            |
 | --------------- | ------------------------------------------- |
-| start.sh        | Setupslkript für die lokale Entwicklung     |
+| start.sh        | Setupskript für die lokale Entwicklung      |
 | compose.dev.yml | Docker Compose für DB, Mailpit, API und Web |
 | Caddyfile       | Reverse-Proxy                               |
 | index.ts        | Server-Einstiegspunkt                       |
-| app.ts          | Fastify, Security und Routenregistierung    |
+| app.ts          | Fastify, Security und Routenregistrierung   |
 | env.ts          | Umgebungsvariablen                          |
 
 ---
@@ -19,7 +19,7 @@
 | metrics.ts       | Katalog der 15 Vitalmetriken mit Gewichtungen            |
 | reference.ts     | Klinische Referenztabellen nach Alter und Geschlecht     |
 | stats.ts         | Gaußsche Fehlerfunktion erf, CDF Φ(z) & Clamping         |
-| plausibility.ts  | Physiologische Grenzwerte- & Plausibilitätsprüfungen     |
+| plausibility.ts  | Physiologische Grenzwert- & Plausibilitätsprüfungen      |
 | holdingPeriod.ts | Validierung stabiler Score-Halteperioden (z. B. 60 Tage) |
 | types.ts         | Domänen-Typen für Messwerte, Domänen und Scores          |
 
@@ -46,12 +46,12 @@
 | ----------------- | -------------------------------------------------- |
 | signing.ts        | Health Score Signatur                              |
 | password.ts       | Passworthashing                                    |
-| csrf.ts           | Genereller CSRF Schutz                             |
-| oauthState.ts     | Schutz gegen Login CSRF                            |
-| pgSessionStore.ts | Nutzensession Persistierung                        |
+| csrf.ts           | Genereller CSRF-Schutz                             |
+| oauthState.ts     | Schutz gegen Login-CSRF                            |
+| pgSessionStore.ts | Nutzersession-Persistierung                        |
 | kvnr.ts           | Validierung und Sicherung von Krankenkassennummern |
 | sampleImport.ts   | Testdatenimport                                    |
-| mail.ts           | Client für die E-Mail Kommunikation                |
+| mail.ts           | Client für die E-Mail-Kommunikation                |
 |                   |                                                    |
 
 ---
@@ -64,7 +64,7 @@
 | score.ts   | Endpunkte für aktuellen Score, Verlauf & Simulation    |
 | sources.ts | Quellen-Status, OAuth-Verbindung & Upload-Endpunkte    |
 | share.ts   | Generierung von Freigabe-Tokens & QR-Codes             |
-| insurer.ts | Krankenkassenprotal, Mitgliedervorteile & Bonusanträge |
+| insurer.ts | Krankenkassenportal, Mitgliedervorteile & Bonusanträge |
 | reports.ts | Berichte und Auswertungen                              |
 | account.ts | Datenexport und Accountverwaltung                      |
 
@@ -106,7 +106,7 @@
 | Daten.tsx                | Datenübersicht                           |
 | Freigabe.tsx             | Datenfreigabe für Krankenkassen          |
 | Vorteile.tsx             | Krankenkassenboniübersicht und Einlösung |
-| Verify.tsx               | Zertifikatprüfung                        |
+| Verify.tsx               | Zertifikatsprüfung                       |
 | Landing.tsx              | Landingpage                              |
 | Login.tsx / Register.tsx | Authentifizierung & Onboarding           |
 | Report.tsx               | Export der Gesundheitsübersicht          |
