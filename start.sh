@@ -121,7 +121,13 @@ if ! docker compose version >/dev/null 2>&1; then
 fi
 
 if ! docker info >/dev/null 2>&1; then
-  log_error "Der Docker-Daemon läuft nicht. Bitte starte Docker Desktop bzw. den dockerd-Dienst."
+  DOCKER_ERR=$(docker info 2>&1 || true)
+  if echo "$DOCKER_ERR" | grep -qi "permission denied"; then
+    log_error "Keine Berechtigung für den Docker-Socket (Permission denied)."
+    echo -e "  ${YELLOW}Tipp:${NC} Führe 'sudo usermod -aG docker \$USER && newgrp docker' aus oder starte mit 'sudo ./start.sh'."
+  else
+    log_error "Der Docker-Daemon läuft nicht. Bitte starte Docker Desktop bzw. den dockerd-Dienst."
+  fi
   exit 1
 fi
 
