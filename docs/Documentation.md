@@ -42,8 +42,8 @@ In sehr vielen Webanwendungen (auch in Projekten, die wir zuvor im Studium gebau
 
 Wie im Authentifizierungsflow beschrieben, erfordert jede Anfrage einen kurzen Abgleich mit der Tabelle `sessions` in der Datenbank. JWT-Tokens dagegen könnten rein mathematisch über ihre Signatur ohne Datenbankzugriff validiert werden, was bei wenigen Anfragen Latenzvorteile, bei vielen Anfragen auch zu bedeutender Serverlastminimierung führen können. Bei einer Gesundheitsplattform gelten jedoch besondere Anforderungen an Sicherheit und DSGVO Art. 9:
 
-1. **Sofortige Widerrufbarkeit (Revocation):** Setzt der User sein Passwort zurück, verliert sein Smartphone, können alle aktiven Sitzungen augenblicklich und geräteübergreifend beendet werden. Ein einmal ausgestelltes JWT bliebe dagegen bis zu seinem Ablaufdatum gültig.
-2. **Schutz vor Token-Diebstahl:** Durch das Speichern der Session-ID im `HttpOnly`-Cookie kann bösartiges JavaScript im Browser die Sitzung nicht auslesen.
+1. Setzt der User sein Passwort zurück, können alle aktiven Sitzungen sofort und geräteübergreifend beendet werden. Ein ausgestelltes JWT bleibt aber bis zu seinem Ablaufdatum gültig.
+2. Durch das Speichern der Session-ID im `HttpOnly`-Cookie kann JavaScript im Browser die ID nicht auslesen.
 
 Alternativen wären JWTs mit sehr kurzer Lebensdauer oder eine serverseitige Token-Blacklist gewesen. Ersteres löst das Problem des sofortigen Widerrufs nicht vollständig, und Zweiteres benötigt am Ende ebenso eine Datenbankabfrage bei allen Request - womit der angebliche Vorteil der Zustandslosigkeit von JWTs wieder verloren geht.
 
@@ -90,4 +90,4 @@ Unsere CI/CD-Pipeline in GitHub Actions erzwingt vor jedem Merge auf `dev` oder 
 3. Drizzle-SQL-Migrationen laufen fehlerfrei auf der PostgreSQL-Testinstanz durch.
 4. Alle Unit- und Integrationstests rennen auf grün durch.
 
-Als finale Sicherheitsstufe galt für alle Änderungen das traditionelle Vier-Augen-Prinzip: Jeder selbst überprüft Änderungen der KI und jeder Pull Request mindestens ein Code-Review durch ein anderes Teammitglied, um die Einhaltung der Anforderungen, die in den Issues genannt waren, und der Systemarchitektur gegenzuprüfen.
+Jeder selbst überprüft Änderungen der KI und jeder Pull Request erfordert mindestens ein Code-Review durch ein anderes Teammitglied, um sicherzugehen, dass Anforderungen, die in den Issues genannt waren, erfüllt werden, und um die Systemarchitektur gegenzuprüfen.
