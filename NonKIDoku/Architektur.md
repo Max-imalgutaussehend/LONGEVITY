@@ -1,8 +1,8 @@
 ## High-Level-Architektur
 
 Das Projekt ist als Monorepo mit jeweils zwei eigenständigen Submodulen für das Backend und das Frontend strukturiert.
-Backend-Repository: [`longevity-backend`](../backend)
-Frontend-Repository: [`longevity-frontend`](../frontend)
+Backend-Repository: [`longevity-backend`](https://github.com/Max-imalgutaussehend/longevity-backend)
+Frontend-Repository: [`longevity-frontend`](https://github.com/Max-imalgutaussehend/longevity-frontend)
 Das Monorepo LONGEVITY beinhaltet außerdem einen Ordner [`infra`](../infra), welcher die Infrastrukturkonfiguration für z. B. Docker enthält.
 
 ## Schichtenarchitektur
