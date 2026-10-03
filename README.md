@@ -53,7 +53,7 @@ docker compose -f compose.dev.yml up --build -d
 
 # Demo-Daten laden (in einem neuen Terminal)
 docker compose -f compose.dev.yml exec api pnpm db:migrate
-docker compose -f compose.dev.yml exec api pnpm seed:demo
+docker compose -f compose.dev.yml exec api pnpm seed:full
 ```
 
 Dann:

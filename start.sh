@@ -56,14 +56,9 @@ case "$ACTION" in
     exit 0
     ;;
   seed)
-    SEED_TYPE="${2:-demo}"
-    if [ "$SEED_TYPE" = "full" ]; then
-      log_info "Lade vollständiges Demo-Dataset (alle Krankenkassen, Anfragen, User & Scores)..."
-      docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:full || \
-        docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/fullDemo.js
-      log_success "Vollständiges Demo-Dataset erfolgreich initialisiert."
-    else
-      log_info "Lade Demo-Daten in die Datenbank..."
+    SEED_TYPE="${2:-full}"
+    if [ "$SEED_TYPE" = "demo" ] || [ "$SEED_TYPE" = "minimal" ]; then
+      log_info "Lade minimales Demo-Dataset in die Datenbank..."
       docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:demo || \
         docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/demo.js
       docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:demo-insurer || \
@@ -72,13 +67,19 @@ case "$ACTION" in
         docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/adminUser.js || true
       docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:offers || \
         docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/offers.js || true
-      log_success "Demo-Daten (Nutzer, Insurer, Admin, Angebote) erfolgreich initialisiert."
+      log_success "Minimales Demo-Dataset erfolgreich initialisiert."
+    else
+      log_info "Lade vollständiges Demo-Dataset (alle Krankenkassen, Anfragen, User & Scores)..."
+      docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:full || \
+        docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/fullDemo.js
+      log_success "Vollständiges Demo-Dataset erfolgreich initialisiert."
     fi
     echo ""
     echo -e "  ${BOLD}Demo-Zugangsdaten:${NC}"
     echo -e "  • ${BOLD}Nutzer-Login:${NC}        demo@longevity.app / demo-longevity-2026"
     echo -e "  • ${BOLD}Insurer-Login:${NC}       insurer-demo@longevity.app / insurer-longevity-2026"
     echo -e "  • ${BOLD}Platform-Admin:${NC}      admin@longevity.app / admin-longevity-2026"
+    echo -e "  • ${BOLD}Weitere Kassen:${NC}      <kasse>-admin@longevity.app / demo-longevity-2026 (tk, barmer, aok, ottonova)"
     exit 0
     ;;
   clean)
@@ -100,7 +101,7 @@ case "$ACTION" in
     echo "  down                 Stoppt alle Container"
     echo "  restart              Stoppt und startet alle Container neu"
     echo "  logs [service]       Zeigt Live-Logs der Container (z. B. ./start.sh logs api)"
-    echo "  seed [full]          Führt den Demo-Datenseed erneut aus (Standard: Demo, optional: full)"
+    echo "  seed [full|demo]     Führt den Demo-Datenseed erneut aus (Standard: full, optional: demo)"
     echo "  clean                Stoppt Container und löscht Docker-Volumes (Reset)"
     echo "  help                 Zeigt diese Hilfe an"
     exit 0
@@ -232,9 +233,9 @@ fi
 log_success "PostgreSQL ist betriebsbereit."
 
 # ------------------------------------------------------------------------------
-# 6. Datenbank migrieren & Demo-Daten seeden
+# 6. Datenbank migrieren & Demo-Daten seeden (Full Dataset)
 # ------------------------------------------------------------------------------
-log_info "Schritt 6/6: Schema-Migrationen anwenden & Demo-Daten seeden..."
+log_info "Schritt 6/6: Schema-Migrationen anwenden & vollständiges Demo-Dataset seeden..."
 
 # Migrationen
 if ! docker compose -f "$COMPOSE_FILE" exec -T api pnpm db:migrate 2>/dev/null; then
@@ -243,27 +244,12 @@ if ! docker compose -f "$COMPOSE_FILE" exec -T api pnpm db:migrate 2>/dev/null; 
 fi
 log_success "Datenbank-Migrationen erfolgreich angewendet."
 
-# Demo-User Seed
-if ! docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:demo 2>/dev/null; then
-  log_info "Fallback auf kompilierte Demo-Seeds..."
-  docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/demo.js
+# Vollständiges Demo-Dataset
+if ! docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:full 2>/dev/null; then
+  log_info "Fallback auf kompilierte Full-Demo-Seeds..."
+  docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/fullDemo.js
 fi
-log_success "Demo-Nutzer erfolgreich angelegt."
-
-# Demo-Insurer Seed
-docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:demo-insurer >/dev/null 2>&1 || \
-  docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/demoInsurer.js >/dev/null 2>&1 || true
-log_success "Demo-Krankenkasse erfolgreich angelegt."
-
-# Platform-Admin Seed
-docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:admin >/dev/null 2>&1 || \
-  docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/adminUser.js >/dev/null 2>&1 || true
-log_success "Platform-Admin erfolgreich angelegt."
-
-# Partner-Angebote Seed
-docker compose -f "$COMPOSE_FILE" exec -T api pnpm seed:offers >/dev/null 2>&1 || \
-  docker compose -f "$COMPOSE_FILE" exec -T api node dist/seed/offers.js >/dev/null 2>&1 || true
-log_success "Partner-Angebote erfolgreich initialisiert."
+log_success "Vollständiges Demo-Dataset (alle Krankenkassen, Nutzer, Angebote & Scores) erfolgreich initialisiert."
 
 echo ""
 echo -e "${GREEN}${BOLD}================================================================${NC}"
@@ -279,10 +265,11 @@ echo -e "  ${BOLD}Demo-Zugangsdaten:${NC}"
 echo -e "  • ${BOLD}Nutzer-Login:${NC}        demo@longevity.app / demo-longevity-2026"
 echo -e "  • ${BOLD}Insurer-Login:${NC}       insurer-demo@longevity.app / insurer-longevity-2026"
 echo -e "  • ${BOLD}Platform-Admin:${NC}      admin@longevity.app / admin-longevity-2026"
+echo -e "  • ${BOLD}Weitere Kassen:${NC}      <kasse>-admin@longevity.app / demo-longevity-2026 (tk, barmer, aok, ottonova)"
 echo ""
 echo -e "  ${BOLD}Hilfreiche Befehle:${NC}"
 echo -e "  • Logs ansehen:  ${CYAN}./start.sh logs${NC} (oder z. B. ./start.sh logs api)"
-echo -e "  • Re-Seed:       ${CYAN}./start.sh seed${NC}"
+echo -e "  • Re-Seed:       ${CYAN}./start.sh seed${NC} (Standard: full)"
 echo -e "  • Stoppen:       ${CYAN}./start.sh down${NC}"
 echo ""
 echo -e "${GREEN}${BOLD}================================================================${NC}"
