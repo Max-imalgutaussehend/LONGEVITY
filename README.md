@@ -27,6 +27,7 @@ Das Skript:
 **Demo-Zugangsdaten:**
 - **Nutzer-Login:** `demo@longevity.app` / `demo-longevity-2026`
 - **Krankenkassen-Admin:** `insurer-demo@longevity.app` / `insurer-longevity-2026`
+- **Platform-Admin:** `admin@longevity.app` / `admin-longevity-2026`
 
 **Umgebung stoppen:**
 ```bash
