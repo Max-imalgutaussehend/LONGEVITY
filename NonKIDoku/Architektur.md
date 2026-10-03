@@ -1,3 +1,5 @@
+# Architektur
+
 ## High-Level-Architektur
 
 Das Projekt ist als Monorepo mit jeweils zwei eigenständigen Submodulen für das Backend und das Frontend strukturiert.
