@@ -6,16 +6,16 @@ In jedem Teilaspekt der Softwareentwicklung gibt es Designentscheidungen - hier 
 
 In sehr vielen Webanwendungen (auch in Projekten, die wir zuvor im Studium gebaut haben) werden zur Authentifizierung zustandslose JWT-Tokens im `localStorage` genutzt. Für dieses Projekt haben wir uns bewusst für die oft als traditioneller angesehene Alternative von Server-Side Sessions entschieden.
 
-Wie im Authentifizierungsflow beschrieben, erfordert jede Anfrage einen kurzen Abgleich mit der Tabelle `sessions` in der Datenbank. JWT-Tokens dagegen könnten rein mathematisch über ihre Signatur ohne Datenbankzugriff validiert werden, was bei wenigen Anfragen Latenzvorteile, bei vielen Anfragen auch zu bedeutender Serverlastminimierung führen können. Bei einer Gesundheitsplattform gelten jedoch besondere Anforderungen an Sicherheit und DSGVO Art. 9:
+Wie im Authentifizierungsflow beschrieben, erfordert jede Anfrage einen kurzen Abgleich mit der Tabelle [`sessions`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/db/schema.ts) in der Datenbank. JWT-Tokens dagegen könnten rein mathematisch über ihre Signatur ohne Datenbankzugriff validiert werden, was bei wenigen Anfragen Latenzvorteile, bei vielen Anfragen auch zu bedeutender Serverlastminimierung führen kann. Bei einer Gesundheitsplattform gelten jedoch besondere Anforderungen an Sicherheit und DSGVO Art. 9:
 
 1. Setzt der User sein Passwort zurück, können alle aktiven Sitzungen sofort und geräteübergreifend beendet werden. Ein ausgestelltes JWT bleibt aber bis zu seinem Ablaufdatum gültig.
 2. Durch das Speichern der Session-ID im `HttpOnly`-Cookie kann JavaScript im Browser die ID nicht auslesen.
 
-Alternativen wären JWTs mit sehr kurzer Lebensdauer oder eine serverseitige Token-Blacklist gewesen. Ersteres löst das Problem des sofortigen Widerrufs nicht vollständig, und Zweiteres benötigt am Ende ebenso eine Datenbankabfrage bei allen Request - womit der angebliche Vorteil der Zustandslosigkeit von JWTs wieder verloren geht.
+Alternativen wären JWTs mit sehr kurzer Lebensdauer oder eine serverseitige Token-Blacklist gewesen. Ersteres löst das Problem des sofortigen Widerrufs nicht vollständig, und Zweiteres benötigt am Ende ebenso eine Datenbankabfrage bei allen Requests - womit der angebliche Vorteil der Zustandslosigkeit von JWTs wieder verloren geht.
 
 ## 2. Append-Only für Messwerte; keine veränderlichen Datensätze (Updates)
 
-Das Backend überschreibt keine vorhandenen Messwerte in der Tabelle `samples`, sondern fügt Messungen immer als unveränderliche neue Einträge hinzu. Zwar wäre es speichersparender, bestehende Datenzeilen bei Korrekturen einfach per SQL-`UPDATE` zu überschreiben, da die Tabellen sonst kontinuierlich anwachsen. Dennoch haben wir uns für das Append-Only-Prinzip entschieden:
+Das Backend überschreibt keine vorhandenen Messwerte in der Tabelle [`samples`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/db/schema.ts), sondern fügt Messungen immer als unveränderliche neue Einträge hinzu. Zwar wäre es speichersparender, bestehende Datenzeilen bei Korrekturen einfach per SQL-`UPDATE` zu überschreiben, da die Tabellen sonst kontinuierlich anwachsen. Dennoch haben wir uns für das Append-Only-Prinzip entschieden:
 
 1. Für das Vertrauen in eine Gesundheitsplattform ist es wichtig, dass der Verlauf immer abgerufen werden kann. Es lässt sich zu jedem Zeitpunkt lückenlos nachvollziehen, auf Basis welcher Rohdaten der Score an einem bestimmten Tag in der Vergangenheit berechnet wurde.
 2. Wird der Berechnungsalgorithmus in Zukunft an neue medizinische Erkenntnisse angepasst, können vergangene Scores rückwirkend neu berechnet werden, ohne dass ursprüngliche Messpunkte fehlen.
@@ -25,7 +25,7 @@ Als Trade-off nehmen wir den höheren Speicherbedarf in Kauf. Zudem bedeutet ein
 
 ## 3. Isolierte Score-Engine anstatt Service-Layer
 
-In vielen Backend-Architekturen ist es üblich, Geschäftslogik in Services zu kapseln, die die benötigten Daten selbst aus der Datenbank abfragen. Wir haben uns bewusst dagegen entschieden: Unsere Score-Engine in `backend/src/score/` ist eine vollkommen reine mathematische Funktion ohne jegliche Ein- und Ausgabeabhängigkeiten.
+In vielen Backend-Architekturen ist es üblich, Geschäftslogik in Services zu kapseln, die die benötigten Daten selbst aus der Datenbank abfragen. Wir haben uns bewusst dagegen entschieden: Unsere Score-Engine in [`backend/src/score/`](https://github.com/Max-imalgutaussehend/longevity-backend/tree/main/src/score) ist eine vollkommen reine mathematische Funktion ohne jegliche Ein- und Ausgabeabhängigkeiten.
 
 - Der Trade-off: Der aufrufende Route-Handler muss die Daten vorbereiten. Er muss zuerst alle relevanten Profil- und Messdaten aus der Datenbank laden und sie der Funktion jeweils als Parameter übergeben.
-- Vorteil: Die Engine importiert weder die Datenbank, noch Fastify, noch greift sie auf die Systemuhr (`Date.now()`) zu. Dadurch ist die Berechnung deterministisch: Gleiche Eingabewerte führen immer zu der selben Ausgabe. Dies ermöglicht Tests ohne Datenbank und ist transparenter in der Entwicklung. Eine feste ESLint-Boundary-Regel verhindert hierbei im Code, dass externe Abhängigkeiten in den Score-Ordner eingeschleust werden.
+- Vorteil: Die Engine importiert weder die Datenbank, noch [Fastify](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/app.ts), noch greift sie auf die Systemuhr (`Date.now()`) zu. Dadurch ist die Berechnung deterministisch: Gleiche Eingabewerte führen immer zu derselben Ausgabe. Dies ermöglicht Tests ohne Datenbank und ist transparenter in der Entwicklung. Eine feste ESLint-Boundary-Regel verhindert hierbei im Code, dass externe Abhängigkeiten in den Score-Ordner eingeschleust werden.

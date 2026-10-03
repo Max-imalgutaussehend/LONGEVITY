@@ -2,9 +2,9 @@
 
 | Datei           | Kurzbeschreibung                            |
 | --------------- | ------------------------------------------- |
-| [start.sh](../start.sh)        | Setupskript für die lokale Entwicklung      |
-| [compose.dev.yml](../infra/compose.dev.yml) | Docker Compose für DB, Mailpit, API und Web |
-| [Caddyfile](../infra/Caddyfile)       | Reverse-Proxy                               |
+| [start.sh](https://github.com/Max-imalgutaussehend/LONGEVITY/blob/main/start.sh)        | Setupskript für die lokale Entwicklung      |
+| [compose.dev.yml](https://github.com/Max-imalgutaussehend/LONGEVITY/blob/main/infra/compose.dev.yml) | Docker Compose für DB, Mailpit, API und Web |
+| [Caddyfile](https://github.com/Max-imalgutaussehend/LONGEVITY/blob/main/infra/Caddyfile)       | Reverse-Proxy                               |
 | [index.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/index.ts)        | Server-Einstiegspunkt                       |
 | [app.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/app.ts)          | Fastify, Security und Routenregistrierung   |
 | [env.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/env.ts)          | Umgebungsvariablen                          |

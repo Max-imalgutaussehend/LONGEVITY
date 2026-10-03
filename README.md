@@ -13,6 +13,7 @@ cd LONGEVITY
 ```
 
 Das Skript:
+
 1. Prüft Voraussetzungen (Docker & Docker Compose).
 2. Initialisiert automatisch alle Git-Submodule (`backend/` und `frontend/`).
 3. Generiert die erforderlichen Ed25519-Keys für Token-Signing in `infra/.env` (falls nicht vorhanden).
@@ -20,15 +21,18 @@ Das Skript:
 5. Wartet auf die Datenbankbereitschaft und wendet automatisch Migrationen & Demo-Daten an.
 
 **Dienste & Web-Oberflächen:**
+
 - **Frontend:** http://localhost:5173
 - **API & Docs:** http://localhost:3000/api/healthz
 - **Mailpit (Mock-Mailserver):** http://localhost:8025
 
 **Demo-Zugangsdaten:**
+
 - **Nutzer-Login:** `demo@longevity.app` / `demo-longevity-2026`
 - **Krankenkassen-Admin:** `insurer-demo@longevity.app` / `insurer-longevity-2026`
 
 **Umgebung stoppen:**
+
 ```bash
 ./start.sh down
 ```
@@ -56,6 +60,7 @@ docker compose -f compose.dev.yml exec api pnpm seed:demo
 ```
 
 Dann:
+
 - Frontend: http://localhost:5173
 - API: http://localhost:3000/api/healthz
 - Mailpit: http://localhost:8025
@@ -78,6 +83,7 @@ git push
 
 ## Docs
 
+- [**System- & Entwicklerdokumentation (NonKIDoku)**](https://github.com/Max-imalgutaussehend/LONGEVITY/blob/main/NonKIDoku/README.md) — Inhaltsverzeichnis & Projektdokumentation
 - `docs/LONGEVITY-SPEC.md` — Master-Spezifikation
 - `docs/SPEC-backend.md` — Backend-Details
 - `docs/SPEC-frontend.md` — Frontend-Details

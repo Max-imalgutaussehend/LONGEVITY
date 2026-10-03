@@ -18,7 +18,7 @@ Unser Backend basiert auf einer domänenbasierten Struktur (DDA) und trennt stri
 
 ### Sicherheit ([backend/src/lib](https://github.com/Max-imalgutaussehend/longevity-backend/tree/main/src/lib))
 
-- In [`signing.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/signing.ts) ist unsere auf ED25519 basierende Signierung von Score-Nachweisen implementiert, welche es den Krankenkassen ermöglicht, die Richtigkeit und Authentizität des Scores sicherzustellen und somit gegen Betrugsversuche zu härten
+- In [`signing.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/signing.ts) ist unsere auf Ed25519 basierende Signierung von Score-Nachweisen implementiert, welche es den Krankenkassen ermöglicht, die Richtigkeit und Authentizität des Scores sicherzustellen und somit gegen Betrugsversuche zu härten
 - [`password.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/password.ts) beinhaltet das auf dem kryptografisch sicheren Argon2-Verfahren basierte Passworthashing, um die Datensicherheit unserer Kunden zu gewährleisten
 - Auch die Krankenversichertennummern werden datenschutzkonform gehasht und zudem bedarf es hier einer Verifizierungslogik. Beides findet sich in [`kvnr.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/kvnr.ts)
 - [`csrf.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/csrf.ts) und [`oauthState.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/oauthState.ts) implementieren zusätzlich eine timingsichere Validierung gegen Login- und Callback-CSRF als zusätzliche Absicherung der Kundendaten
@@ -42,10 +42,8 @@ Um eine übersichtliche UI für Interessierte, Kunden und Versicherer bereitzust
 ### State und Datalayer ([frontend/src/api](https://github.com/Max-imalgutaussehend/longevity-frontend/tree/main/src/api))
 
 Unser State- und Datalayer ist das Gegenstück zur API-Schicht im Backend und implementiert auch die Kommunikation mit diesem.
-Dazu nutzen wir [`client.ts`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/api/client.ts) als zentralen HTTP-Client für die Kommunikation mit der Backend-API in Kombination mit [`generated.ts`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/api/generated.ts), welches typisierte Interfaces für die API-Kommunikation bereitstellt und vollständig auf unserer OpenAPI-Spezifikation basiert
+Dazu nutzen wir [`client.ts`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/api/client.ts) als zentralen HTTP-Client für die Kommunikation mit der Backend-API in Kombination mit [`generated.ts`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/api/generated.ts), welches typisierte Interfaces für die API-Kommunikation bereitstellt und vollständig auf unserer OpenAPI-Spezifikation basiert.
 
 ### Design System ([tokens.css](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/styles/tokens.css))
 
 Diese Schicht des Frontends ist das Zentrum unserer Brand Identity und implementiert das gesamte optische Erscheinungsbild in Form unserer Farbpalette, Schriftarten etc.
-
-## Schnellübersicht
