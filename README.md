@@ -34,6 +34,32 @@ Das Skript:
 ./start.sh down
 ```
 
+### Tests ausführen
+
+Tests können direkt über das `./start.sh`-Skript ausgeführt werden. Das Skript initialisiert bei Bedarf Submodule, stellt eine betriebsbereite PostgreSQL-Datenbank für Backend-Integrationstests sicher und führt die Test-Suites aus:
+
+```bash
+# Alle Tests ausführen (Backend & Frontend)
+./start.sh test
+
+# Nur Backend-Tests ausführen
+./start.sh test backend
+
+# Nur Frontend-Tests ausführen
+./start.sh test frontend
+
+# Bestimmte Testdatei oder Filter ausführen
+./start.sh test backend src/score/__tests__/computeScore.test.ts
+./start.sh test frontend src/__tests__/landingAndRouting.test.ts
+
+# Watch-Modus
+./start.sh test backend --watch
+./start.sh test frontend --watch
+
+# E2E-Tests ausführen (Playwright)
+./start.sh test e2e
+```
+
 ---
 
 ### Alternative: Manuelle Einzelschritte

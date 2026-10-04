@@ -93,6 +93,154 @@ case "$ACTION" in
     fi
     exit 0
     ;;
+  test)
+    shift || true
+    TARGET="${1:-all}"
+
+    # Git-Submodule prüfen & initialisieren falls nötig
+    if [ ! -f "backend/package.json" ] || [ ! -f "frontend/package.json" ]; then
+      if [ -d ".git" ]; then
+        log_info "Initialisiere Submodule..."
+        git submodule update --init --recursive
+        log_success "Submodule erfolgreich synchronisiert."
+      else
+        log_error "Submodule fehlen. Bitte 'backend' und 'frontend' bereitstellen."
+        exit 1
+      fi
+    fi
+
+    # pnpm-Befehl ermitteln
+    if command -v pnpm >/dev/null 2>&1; then
+      PNPM_CMD="pnpm"
+    elif command -v corepack >/dev/null 2>&1; then
+      PNPM_CMD="corepack pnpm"
+    elif command -v npx >/dev/null 2>&1; then
+      PNPM_CMD="npx pnpm"
+    else
+      log_error "Weder 'pnpm', 'corepack' noch 'npx' gefunden. Bitte pnpm installieren: https://pnpm.io/installation"
+      exit 1
+    fi
+
+    ensure_backend_deps() {
+      if [ ! -d "backend/node_modules" ]; then
+        log_info "Installiere Backend-Abhängigkeiten..."
+        $PNPM_CMD --dir backend install
+        log_success "Backend-Abhängigkeiten installiert."
+      fi
+    }
+
+    ensure_frontend_deps() {
+      if [ ! -d "frontend/node_modules" ]; then
+        log_info "Installiere Frontend-Abhängigkeiten..."
+        $PNPM_CMD --dir frontend install
+        log_success "Frontend-Abhängigkeiten installiert."
+      fi
+    }
+
+    ensure_db_ready() {
+      if (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1; then
+        log_success "PostgreSQL ist auf Port 5432 erreichbar."
+        return 0
+      fi
+
+      log_info "PostgreSQL ist nicht erreichbar. Starte Datenbank-Container via Docker Compose..."
+      if ! command -v docker >/dev/null 2>&1; then
+        log_warn "Docker ist nicht verfügbar. Bitte PostgreSQL auf Port 5432 starten, um Backend-Integrationstests auszuführen."
+        return 0
+      fi
+
+      docker compose -f "$COMPOSE_FILE" up -d db
+      local retries=30
+      until docker compose -f "$COMPOSE_FILE" exec -T db pg_isready -U longevity >/dev/null 2>&1 || [ $retries -eq 0 ]; do
+        sleep 1
+        retries=$((retries - 1))
+      done
+
+      if [ $retries -eq 0 ]; then
+        log_warn "PostgreSQL-Container antwortet noch nicht. Backend-Integrationstests könnten fehlschlagen."
+      else
+        log_success "PostgreSQL ist betriebsbereit."
+      fi
+    }
+
+    run_backend_tests() {
+      ensure_backend_deps
+      ensure_db_ready
+      $PNPM_CMD --dir backend db:migrate >/dev/null 2>&1 || true
+      log_info "Führe Backend-Tests aus (Vitest)..."
+      (cd backend && $PNPM_CMD test "$@")
+      log_success "Backend-Tests erfolgreich abgeschlossen."
+    }
+
+    run_frontend_tests() {
+      ensure_frontend_deps
+      log_info "Führe Frontend-Tests aus (Vitest)..."
+      (cd frontend && $PNPM_CMD test "$@")
+      log_success "Frontend-Tests erfolgreich abgeschlossen."
+    }
+
+    run_e2e_tests() {
+      ensure_frontend_deps
+      log_info "Führe E2E-Tests aus (Playwright)..."
+      (cd frontend && $PNPM_CMD test:e2e "$@")
+      log_success "E2E-Tests erfolgreich abgeschlossen."
+    }
+
+    case "$TARGET" in
+      backend)
+        shift || true
+        run_backend_tests "$@"
+        ;;
+      frontend)
+        shift || true
+        run_frontend_tests "$@"
+        ;;
+      e2e)
+        shift || true
+        run_e2e_tests "$@"
+        ;;
+      all)
+        shift || true
+        log_info "Starte alle Tests (Backend & Frontend)..."
+        echo ""
+        run_backend_tests
+        echo ""
+        run_frontend_tests
+        echo ""
+        log_success "Alle Tests (Backend & Frontend) erfolgreich abgeschlossen! 🎉"
+        ;;
+      help|--help|-h)
+        echo "Verwendung: ./start.sh test [backend|frontend|e2e|all] [Optionen]"
+        echo ""
+        echo "Ziele:"
+        echo "  all (Standard)   Führt alle Backend- und Frontend-Tests aus"
+        echo "  backend          Führt Vitest-Tests im Backend aus"
+        echo "  frontend         Führt Vitest-Tests im Frontend aus"
+        echo "  e2e              Führt Playwright E2E-Tests im Frontend aus"
+        echo ""
+        echo "Beispiele:"
+        echo "  ./start.sh test"
+        echo "  ./start.sh test backend"
+        echo "  ./start.sh test frontend"
+        echo "  ./start.sh test backend src/score/__tests__/computeScore.test.ts"
+        echo "  ./start.sh test backend --watch"
+        echo "  ./start.sh test frontend --watch"
+        echo "  ./start.sh test e2e"
+        exit 0
+        ;;
+      *)
+        if [[ "$TARGET" =~ ^- ]]; then
+          log_info "Führe Tests mit Parameter '$TARGET' aus..."
+          run_backend_tests "$TARGET" "$@"
+        else
+          log_error "Unbekanntes Test-Ziel: $TARGET"
+          echo "Verwende './start.sh test --help' für Optionen."
+          exit 1
+        fi
+        ;;
+    esac
+    exit 0
+    ;;
   help|--help|-h)
     echo "Verwendung: ./start.sh [Befehl]"
     echo ""
@@ -103,6 +251,7 @@ case "$ACTION" in
     echo "  logs [service]       Zeigt Live-Logs der Container (z. B. ./start.sh logs api)"
     echo "  seed [full|demo]     Führt den Demo-Datenseed erneut aus (Standard: full, optional: demo)"
     echo "  clean                Stoppt Container und löscht Docker-Volumes (Reset)"
+    echo "  test [ziel] [opt]    Führt Tests aus (backend, frontend, e2e oder all; Standard: all)"
     echo "  help                 Zeigt diese Hilfe an"
     exit 0
     ;;
@@ -268,8 +417,9 @@ echo -e "  • ${BOLD}Platform-Admin:${NC}      admin@longevity.app / admin-long
 echo -e "  • ${BOLD}Weitere Kassen:${NC}      <kasse>-admin@longevity.app / demo-longevity-2026 (tk, barmer, aok, ottonova)"
 echo ""
 echo -e "  ${BOLD}Hilfreiche Befehle:${NC}"
-echo -e "  • Logs ansehen:  ${CYAN}./start.sh logs${NC} (oder z. B. ./start.sh logs api)"
-echo -e "  • Re-Seed:       ${CYAN}./start.sh seed${NC} (Standard: full)"
-echo -e "  • Stoppen:       ${CYAN}./start.sh down${NC}"
+echo -e "  • Logs ansehen:    ${CYAN}./start.sh logs${NC} (oder z. B. ./start.sh logs api)"
+echo -e "  • Tests ausführen: ${CYAN}./start.sh test${NC} (oder z. B. ./start.sh test backend / frontend)"
+echo -e "  • Re-Seed:         ${CYAN}./start.sh seed${NC} (Standard: full)"
+echo -e "  • Stoppen:         ${CYAN}./start.sh down${NC}"
 echo ""
 echo -e "${GREEN}${BOLD}================================================================${NC}"
