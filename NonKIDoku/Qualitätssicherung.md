@@ -37,5 +37,5 @@ Die Test-Suite besteht insgesamt aus 91 Testdateien mit 684 Tests (464 im Backen
 | **Backend**          |     63      |  464  |   77.50%   |  73.15%  |  81.57%   | 77.50% |
 | **Frontend**         |     28      |  220  |   31.71%   |  66.48%  |  33.11%   | 31.71% |
 
-- **Backend:** Hohe Testabdeckung (77,50 % Statements & Zeilen, 73,15 % Branches, 81,57 % Functions), die durch umfassende Unit- und reale Integrations-Tests erreicht wird.
-- **Frontend (31,71 %):** Alle mathematischen Berechnungs-, Validierungs- und Zustandskerne im Frontend weisen eine isolierte Unit-Test-Abdeckung von 90–100 % auf. Da das Frontend darüber hinaus zu großen Teilen aus deklarativem JSX-Markup, Layout-Containern und CSS-Komponenten besteht, die visuell wirken und keine verzweigte Businesslogik enthalten, fällt die zeilenbasierte Abdeckung hier naturgemäß geringer aus. Die automatisierten Playwright-End-to-End-Tests decken ergänzend die echten Benutzerinteraktionen, Klicks und Browser-Workflows im Gesamtzusammenhang ab.
+- Backend: Insgesamt hohe Testabdeckung von 73.15%, die durch Unit Tests und Integrationstests erreicht wird.
+- Frontend (31.71 %): Alle tatsächlichen Logikfunktionen im Frontend haben eine Unit Test Abdeckung von 90-100%. Da Frontend ansonsten auch viele Zeilen von leeren Hüllen hat, bzw. einfach nur fürs Design, die nicht logisch testbar sind, ist hier die Testabdeckung niedriger. Die Playwright Tests decken aber auch diese Designs sowie klickbare Knöpfe ab.
