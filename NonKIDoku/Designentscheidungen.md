@@ -1,6 +1,6 @@
 # Designentscheidungen
 
-In jedem Teilaspekt der Softwareentwicklung gibt es Designentscheidungen - hier werden die wichtigsten und bewusst gewählten Architektur-Trade-offs beschrieben. Im Allgemeinen wurden die Entscheidungen so getroffen, dass sie der Datensicherheit (DSGVO-Konformität bei Gesundheitsdaten) dienen, eine deterministische mathematische Testbarkeit bieten und eine hohe Wartbarkeit sicherstellen.
+In jedem Teilaspekt der Softwareentwicklung gibt es Designentscheidungen, im Folgenden werden unsere wichtigsten und bewusst gewählten Architektur-Trade-offs beschrieben. Im Allgemeinen wurden die Entscheidungen so getroffen, dass sie der Datensicherheit (DSGVO-Konformität bei Gesundheitsdaten) dienen, eine deterministische mathematische Testbarkeit bieten und eine hohe Wartbarkeit sicherstellen.
 
 ## 1. Server-Side Sessions mit PostgreSQL anstatt Stateless JWTs im LocalStorage
 
