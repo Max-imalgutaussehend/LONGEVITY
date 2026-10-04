@@ -4,7 +4,7 @@ Dieser Ordner enthält die nicht durch künstliche Intelligenz generierte Dokume
 
 **Neue Konzepte - Vibe-Coding, AI-Entrepreneurship und digitale Geschäftsmodelle**
 
-Eingereicht von: Till Burdorf, Victor Hacker, Max Rommer, Christina Schulz und Lea Dennhardt
+Eingereicht von: Till Burdorf, Victor Hacker, Max Rommel, Christina Schulz und Lea Dennhardt
 
 ---
 

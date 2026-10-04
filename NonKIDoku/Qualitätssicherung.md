@@ -1,4 +1,4 @@
-# Tests- und Qualitätssicherungskonzept
+# Test- und Qualitätssicherungskonzept
 
 ## Tests
 
@@ -20,7 +20,7 @@ Unsere CI/CD-Pipeline in [GitHub Actions](https://github.com/Max-imalgutaussehen
 1. TypeScript wird im Strict-Mode betrieben; implizite `any`-Typen sind dadurch ausgeschlossen. Typinkonsistenzen zwischen Frontend und Backend werden abgelehnt.
 2. ESLint (mit `@typescript-eslint`) erzwingt gleiche Formatierung, verbietet ungenutzte Imports/Variablen und sichert Architektur-Grenzen ab (z. B. dass die Score-Engine keine Datenbankmodule importieren darf).
 3. [Drizzle-SQL-Migrationen](https://github.com/Max-imalgutaussehend/longevity-backend/tree/main/src/db/migrations) laufen fehlerfrei auf der PostgreSQL-Testinstanz durch.
-4. Alle Unit- und Integrationstests rennen auf grün durch.
+4. Alle Unit- und Integrationstests laufen grün durch.
 
 Jeder selbst überprüft Änderungen der KI und jeder Pull Request erfordert mindestens ein Code-Review durch ein anderes Teammitglied, um sicherzugehen, dass Anforderungen, die in den Issues genannt waren, erfüllt werden, und um die Systemarchitektur gegenzuprüfen.
 
@@ -37,5 +37,5 @@ Die Test-Suite besteht insgesamt aus 91 Testdateien mit 684 Tests (464 im Backen
 | **Backend**          |     63      |  464  |   77.50%   |  73.15%  |  81.57%   | 77.50% |
 | **Frontend**         |     28      |  220  |   31.71%   |  66.48%  |  33.11%   | 31.71% |
 
-- Backend: Insgesamt hohe Testabdeckung von 73.15%, die durch Unit Tests und Integrationstests erreicht werden.
-- Frontend (31.71 %):Alle tatsächlichen Logikfunktionen im Frontend haben eine Unit Test Abdeckung von 90-100%. Da Frontend ansonsten auch viele Zeilen von leeren Hüllen hat, bzw. einfach nur fürs Design, die nicht logisch testbar sind, ist hier die Testabdeckung niedriger. Die Playwright Tests decken aber auch diese Designs sowie klickbare Knöpfe ab.
+- **Backend:** Hohe Testabdeckung (77,50 % Statements & Zeilen, 73,15 % Branches, 81,57 % Functions), die durch umfassende Unit- und reale Integrations-Tests erreicht wird.
+- **Frontend (31,71 %):** Alle mathematischen Berechnungs-, Validierungs- und Zustandskerne im Frontend weisen eine isolierte Unit-Test-Abdeckung von 90–100 % auf. Da das Frontend darüber hinaus zu großen Teilen aus deklarativem JSX-Markup, Layout-Containern und CSS-Komponenten besteht, die visuell wirken und keine verzweigte Businesslogik enthalten, fällt die zeilenbasierte Abdeckung hier naturgemäß geringer aus. Die automatisierten Playwright-End-to-End-Tests decken ergänzend die echten Benutzerinteraktionen, Klicks und Browser-Workflows im Gesamtzusammenhang ab.

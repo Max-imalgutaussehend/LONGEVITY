@@ -38,7 +38,6 @@
 | [strava.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/adapters/strava.ts)         | Strava API-Adapter            |
 | [googleFit.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/adapters/googleFit.ts)      | Google Fit API-Adapter        |
 | [fhir.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/adapters/fhir.ts)           | Parsing von Laborwertimporten |
-|                   |                               |
 
 ---
 
@@ -54,7 +53,6 @@
 | [kvnr.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/kvnr.ts)           | Validierung und Sicherung von Krankenkassennummern |
 | [sampleImport.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/sampleImport.ts)   | Testdatenimport                                    |
 | [mail.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/lib/mail.ts)           | Client für die E-Mail-Kommunikation                |
-|                   |                                                    |
 
 ---
 
@@ -79,7 +77,6 @@
 | [schema.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/db/schema.ts)  | Drizzle ORM Schemata           |
 | [client.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/db/client.ts)  | Datenbankclient für PostgreSQL |
 | [migrate.ts](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/db/migrate.ts) | Datenbankmigrationen           |
-|            |                                |
 
 ---
 
@@ -95,7 +92,6 @@
 | [PublicShell.tsx](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/PublicShell.tsx)  | Landingpage                                         |
 | [InsurerShell.tsx](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/InsurerShell.tsx) | Krankenkassendashboard                              |
 | [AdminShell.tsx](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/AdminShell.tsx)   | Admindashboard                                      |
-|                  |                                                     |
 
 ---
 

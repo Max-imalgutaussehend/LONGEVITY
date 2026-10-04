@@ -33,11 +33,12 @@ Unser Backend basiert auf einer domänenbasierten Struktur (DDA) und trennt stri
 
 ### Layout Shells ([frontend/src/routes](https://github.com/Max-imalgutaussehend/longevity-frontend/tree/main/src/routes))
 
-Um eine übersichtliche UI für Interessierte, Kunden und Versicherer bereitzustellen, trennt unser Frontend drei Ansichten in Form von getrennten Anwendungsshells.
+Um eine übersichtliche UI für Interessierte, Kunden, Versicherer und Administratoren bereitzustellen, unterteilt unser Frontend die Ansichten in vier getrennte Anwendungsshells:
 
-1. [`AppShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/AppShell.tsx) - beinhaltet das Dashboard für angemeldete Benutzer und ist somit die zentrale Oberfläche unserer B2C-Kunden
-2. [`PublicShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/PublicShell.tsx) - fungiert als zentrale Landingpage im Browser, die Interessierten einen Überblick über unsere App verschafft und den Anmeldebereich für Bestandskunden und Versicherer anbietet. Sie fungiert somit zeitgleich als Navigationsoberfläche für verschiedene Zielgruppen unserer App
-3. [`InsurerShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/InsurerShell.tsx) - diese Oberfläche implementiert die zentrale Übersicht und Konfigurationsumgebung für unsere B2B-Kunden und ermöglicht die Pflege neuer Bonusanträge, Einsicht von Statistiken etc.
+1. [`AppShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/AppShell.tsx) - beinhaltet das Dashboard für angemeldete Endnutzer und ist somit die zentrale Oberfläche unserer B2C-Kunden.
+2. [`PublicShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/PublicShell.tsx) - fungiert als zentrale Landingpage im Browser, die Interessierten einen Überblick über unsere Plattform verschafft und den Anmeldebereich für Bestandskunden und Versicherer anbietet.
+3. [`InsurerShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/InsurerShell.tsx) - implementiert die zentrale Übersicht und Konfigurationsumgebung für Versicherungs- und B2B-Partner (Pflege von Mitgliedervorteilen, Bonusanträgen und aggregierten Statistiken).
+4. [`AdminShell.tsx`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/routes/AdminShell.tsx) - geschützter Administrationsbereich für Plattform-Administratoren zur Verwaltung übergreifender Systemeinstellungen und Benutzerkonten.
 
 ### State und Datalayer ([frontend/src/api](https://github.com/Max-imalgutaussehend/longevity-frontend/tree/main/src/api))
 

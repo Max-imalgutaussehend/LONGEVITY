@@ -20,7 +20,7 @@ sequenceDiagram
 
 Bevor die grundlegende Kommunikation zwischen Front- und Backend funktionieren kann, ist es wichtig, dass sich der User authentifiziert, sodass das Backend die nötigen Daten zur Verfügung stellen kann. Sobald sich ein User anmeldet und die Anmeldedaten im Backend als gültig überprüft wurden (E-Mail existiert und Passwort-Hashes stimmen überein), wird eine Session-ID erstellt, die in der Datenbank (Tabelle [`sessions`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/db/schema.ts)) gespeichert wird und dem richtigen User zugeordnet ist.
 
-Diese Session-ID wird danach an das Frontend zurückgesendet - das passiert über einen `Set-Cookie`-Header mit dem Sicherheitsflag `HttpOnly`. Dadurch speichert der JavaScript-Code den Cookie nicht manuell ab, sondern der Webbrowser verwahrt ihn selbstständig in einem geschützten Speicher und sendet es bei jedem weiteren Request automatisch im Hintergrund mit. Da Frontend-JavaScript keinen Lesezugriff auf dieses Cookie hat, ist das Verfahren gegen Angriffe wie durch Cross-Site-Scripting (sogenanntes XSS) geschützt.
+Diese Session-ID wird danach an das Frontend zurückgesendet - das passiert über einen `Set-Cookie`-Header mit dem Sicherheitsflag `HttpOnly`. Dadurch speichert der JavaScript-Code den Cookie nicht manuell ab, sondern der Webbrowser verwahrt ihn selbstständig in einem geschützten Speicher und sendet ihn bei jedem weiteren Request automatisch im Hintergrund mit. Da Frontend-JavaScript keinen Lesezugriff auf dieses Cookie hat, ist das Verfahren gegen Angriffe wie durch Cross-Site-Scripting (sogenanntes XSS) geschützt.
 
 ## Datenfluss im Frontend
 
@@ -42,6 +42,6 @@ Der zuständige Route-Handler führt nun seine Logik aus. Um bei unserem Beispie
 db.select().from(samples).where(eq(samples.userId, user.id));
 ```
 
-Anders als bei SQL-Strings können keine Tippfehler passieren, da TypeScript falsche Funktionsnamen bzw. Spalten merkt und diese somit nicht erst zur Laufzeit fehlschlagen. Zudem werden alle Werte von Drizzle parametrisiert, wodurch die Anwendung vor SQL-Injections geschützt ist.
+Anders als bei reinen SQL-Strings können keine Tippfehler unbemerkt bleiben, da der TypeScript-Compiler fehlerhafte Tabellen- oder Spaltennamen bereits während der Entwicklung beanstandet und diese somit nicht erst zur Laufzeit fehlschlagen. Zudem werden alle Werte von Drizzle parametrisiert, wodurch die Anwendung vor SQL-Injections geschützt ist.
 
 Die erhaltenen Daten werden dann an die Rechenfunktion [`computeScore()`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/score/index.ts) übergeben. Über diese wird das Ergebnis kalkuliert, das Backend sichert einen Snapshot in der Datenbank und Fastify sendet das Resultat als typisiertes JSON mit Status 200 OK an das Frontend zurück.

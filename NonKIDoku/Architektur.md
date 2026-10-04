@@ -44,7 +44,7 @@ flowchart LR
 
 ### 4. Konnektoren und Adapter
 
-- **Technologie:** TypeScript, Anbieter-APIs, TypeScript
+- **Technologie:** TypeScript, diverse externe Anbieter-APIs
 - Externe Datenformate und die Datenbeschaffung der Gesundheitsanbieter etc. sind in der [Adapter- und Ingestionsschicht](https://github.com/Max-imalgutaussehend/longevity-backend/tree/main/src/adapters) angesiedelt
 - Hier sind sämtliche Kommunikationen mit externen Diensten implementiert, um die Daten für die im Core isolierte Scoreberechnung bereitzustellen
 - Der Datenimport erfolgt wie folgt:
