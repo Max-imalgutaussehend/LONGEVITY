@@ -1,5 +1,9 @@
 # LONGEVITY — Health Score Platform
 
+Der einfachste Weg, die Webapp zu testen und anzuschauen, ist über die deployte Website: https://longevity.maxrommel.de/
+
+Es ist jedoch auch einfach möglich, es lokal auf seiner eigenen Maschine zu starten:
+
 ## Setup (lokal)
 
 ### Schnellstart
