@@ -7,9 +7,9 @@ In vielen Webanwendungen werden Mocks genutzt, um Komponenten isoliert zu testen
 Daher ist eine klare Trennung gegeben:
 
 - Jeder der Backend-Integrationstests läuft gegen eine reale PostgreSQL-16-Instanz (lokal mittels Docker Compose, in [GitHub Actions](https://github.com/Max-imalgutaussehend/LONGEVITY/blob/main/.github/workflows/ci.yml) über einen Service-Container).
-- Der zentrale Aspekt der gesamten Webapp – die Score-Engine – benötigt, wie früher erwähnt, keine Datenbank. Sie wird im Rahmen von sogenannten Golden Master Tests ([`backend/src/score/__tests__/golden.test.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/score/__tests__/golden.test.ts)) mit JSON-Datensätzen gefüttert. Da das mathematische Ergebnis deterministisch ist, fallen falsche Abweichungen sofort auf. Ein Monotonie-Test stellt zudem sicher, dass eine Verbesserung eines Einzelwerts den Gesamtscore niemals senken kann.
+- Der zentrale Aspekt der gesamten Webapp (die Score-Engine) benötigt, wie früher erwähnt, keine Datenbank. Sie wird im Rahmen von sogenannten Golden Master Tests ([`backend/src/score/__tests__/golden.test.ts`](https://github.com/Max-imalgutaussehend/longevity-backend/blob/main/src/score/__tests__/golden.test.ts)) mit JSON-Datensätzen gefüttert. Da das mathematische Ergebnis deterministisch ist, fallen falsche Abweichungen sofort auf. Ein Monotonie-Test stellt zudem sicher, dass eine Verbesserung eines Einzelwerts den Gesamtscore niemals senken kann.
 - Mit Vitest und jsdom testen wir Berechnungs- und Formatierungsfunktionen im Interface (z. B. die Punkteberechnung bis zum nächsten Score-Band) sowie Labels an Schiebereglern und Formularen ([`formLabelA11y`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/__tests__/formLabelA11y.test.ts), [`sliderA11y`](https://github.com/Max-imalgutaussehend/longevity-frontend/blob/main/src/__tests__/sliderA11y.test.ts)), um Screenreader-Kompatibilität zu garantieren.
-- Da vollständige Browser-Tests ressourcen- und zeitintensiv sind, werden nur die wichtigsten Benutzerreisen im echten Headless-Browser abgedeckt.
+- Da vollständige Browser-Tests ressourcenintensiv und zeitintensiv sind, werden nur die wichtigsten Benutzerreisen im echten Headless-Browser abgedeckt.
 
 ## Qualitätssicherung
 
