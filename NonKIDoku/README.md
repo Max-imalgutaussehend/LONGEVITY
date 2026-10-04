@@ -1,8 +1,10 @@
 # Inhaltsverzeichnis — Projektdokumentation
 
-Das ist das Inhaltsverzeichnis für die Non-KI-Doku.
+Dieser Ordner enthält die nicht durch künstliche Intelligenz generierte Dokumentation des Projektes LONGEVITY im Rahmen des Moduls
 
-DISCLAIMER: Während die gesamte Doku ausschlißlich ohne KI geschrieben wurde, wurden die Verlinkungen auf Github mithilfe von KI verlinkt, damit über die Namen direkt zu dem gegebenen Code navigiert werden kann.
+**Neue Konzepte - Vibe-Coding, AI-Entrepreneurship und digitale Geschäftsmodelle**
+
+Eingereicht von: Till Burdorf, Victor Hacker, Max Rommer, Christina Schulz und Lea Dennhardt
 
 ---
 
