@@ -34,6 +34,7 @@ Das Skript:
 
 - **Nutzer-Login:** `demo@longevity.app` / `demo-longevity-2026`
 - **Krankenkassen-Admin:** `insurer-demo@longevity.app` / `insurer-longevity-2026`
+- **Platform-Admin:** `admin@longevity.app` / `admin-longevity-2026`
 
 **Umgebung stoppen:**
 
@@ -60,7 +61,7 @@ docker compose -f compose.dev.yml up --build -d
 
 # Demo-Daten laden (in einem neuen Terminal)
 docker compose -f compose.dev.yml exec api pnpm db:migrate
-docker compose -f compose.dev.yml exec api pnpm seed:demo
+docker compose -f compose.dev.yml exec api pnpm seed:full
 ```
 
 Dann:
